@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Página Inicial - Projeto NFC-e Tools</title>
+    <link rel="stylesheet" href="styles.css"> 
+    <style>
+        /* CSS Específico da Página Inicial */
+        
+        #logo {
+            font-size: 28px; /* Ajuste para o tamanho maior da página inicial */
+            margin-bottom: 10px;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .main-content h2 {
+            color: #1b56ab;
+            font-size: 32px;
+            margin-top: 0;
+        }
+
+        .main-content p {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div id="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        NFC-e Tools - Menu Principal
+    </div>
+    
+    <nav class="main-menu">
+        <ul>
+            <li><a href="index.html">Início</a></li>
+            <li><a href="Mapa NFCe Consulta.html">Consulta por Estado</a></li>
+            <li><a href="analise_xml.html">Análise de XML</a></li>
+            <li><a href="xml_cleaner.html">Limpar XML</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="main-content card">
+    <h2>Bem-vindo(a) ao seu Painel de Ferramentas NFC-e</h2>
+    <p>Esta página concentra o acesso a todas as ferramentas do seu projeto.</p>
+    <p>Use o menu de navegação acima para:</p>
+    <ul>
+        <li>**Consulta por Estado:** Acessar links diretos de consulta NFC-e dos estados.</li>
+        <li>**Análise de XML:** Carregar um XML para ver os dados principais, ICMS/IPI e agrupamentos.</li>
+        <li>**Limpar XML:** Remover tags desnecessárias e organizar seu arquivo XML.</li>
+    </ul>
+</main>
+
+</body>
+</html>

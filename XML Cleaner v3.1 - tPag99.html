@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Limpar XML de NF-e</title>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+    /* Reset básico e tipografia */
+    body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f4f8; /* Fundo mais suave */
+        color: #333;
+    }
+
+    /* --- Cabeçalho --- */
+    header {
+        width: 100%;
+        background: #1b56ab; 
+        color: white;
+        padding: 16px 30px; 
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-sizing: border-box;
+        font-size: 16px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    #logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 24px;
+        font-weight: 600; 
+    }
+    
+    /* Área principal centralizada */
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 80px); 
+        padding: 40px 20px;
+        box-sizing: border-box;
+    }
+
+    /* Card branco */
+    .card {
+        background: white; 
+        padding: 40px; 
+        width: 100%;
+        max-width: 500px; 
+        border-radius: 12px; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05), 0 3px 10px rgba(0,0,0,0.03); 
+        border: 1px solid #e0e6ef; 
+    }
+
+    /* Título no Card */
+    .card h2 {
+        margin-top: 0;
+        color: #1b56ab;
+        font-weight: 600;
+        font-size: 22px;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    label {
+        display: block;
+        margin-top: 20px;
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: #555; 
+        font-weight: 600;
+    }
+
+    input[type="file"], input[type="text"] {
+        display: block; 
+        padding: 12px;
+        background: #f8f9fa; 
+        border: 1px solid #c9d2e0; 
+        border-radius: 8px; 
+        width: 100%;
+        box-sizing: border-box;
+        transition: border-color 0.3s;
+        font-size: 14px; /* Garante que a fonte do input de texto seja legível */
+    }
+
+    input[type="file"]:focus, input[type="text"]:focus {
+        border-color: #2368d0; 
+        outline: none;
+    }
+
+    textarea {
+        width: 100%;
+        height: 250px; 
+        margin-top: 10px;
+        padding: 15px;
+        border: 1px solid #c9d2e0;
+        border-radius: 8px;
+        resize: vertical;
+        font-size: 14px; 
+        font-family: monospace; 
+        background-color: #fefefe;
+        box-sizing: border-box;
+        transition: border-color 0.3s;
+    }
+
+    textarea:focus {
+        border-color: #2368d0;
+        outline: none;
+    }
+
+    button {
+        width: 100%;
+        background: #2368d0; 
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 8px; 
+        margin-top: 15px; 
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: background 0.3s, box-shadow 0.3s;
+        text-transform: uppercase; 
+        letter-spacing: 0.5px;
+    }
+    
+    /* Botão de Exportar - Cor Secundária */
+    button:nth-of-type(2) { 
+        background: #39a388; 
+    }
+
+    button:hover {
+        background: #1b56ab; 
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    button:nth-of-type(2):hover {
+        background: #2a816d; 
+    }
+    
+    /* Media Query para telas menores */
+    @media (max-width: 600px) {
+        .card {
+            padding: 30px 20px;
+        }
+        header {
+            padding: 12px 20px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <div id="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        XML Cleaner
+    </div>
+</header>
+
+<div class="container">
+    <div class="card">
+        
+        <h2>Limpeza Rápida de XML da NF-e</h2>
+        
+        <label for="xmlFile">Importar XML da NF-e:</label>
+        <input type="file" id="xmlFile" accept=".xml">
+        
+        <label for="extraTags">Tags Extras para Remover (separadas por vírgula):</label>
+        <input type="text" id="extraTags" placeholder="Ex: dPrevEntrega, tagTeste..">
+        <button onclick="processXML()">Processar XML</button>
+        <button onclick="exportXML()">Exportar XML Corrigido</button>
+
+        <label for="output">XML Após Limpeza:</label>
+        <textarea id="output" placeholder="O XML limpo aparecerá aqui..."></textarea>
+
+    </div>
+</div>
+
+<script>
+let originalFileName = '';
+
+function processXML() {
+    const fileInput = document.getElementById('xmlFile');
+    if (!fileInput.files.length) {
+        alert('Selecione um arquivo XML primeiro.');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    originalFileName = file.name.replace(/\.xml$/i, ''); 
+
+    // --- LÓGICA DAS TAGS PARA REMOÇÃO ---
+    const defaultTags = [
+        'IBSCBS',
+        'vItem',
+        'infAdProd',
+        'IBSCBSTot',
+        'vNFTot',
+		'dPrevEntrega'
+    ];
+    
+    const extraTagsInput = document.getElementById('extraTags').value;
+    let extraTags = [];
+
+    if (extraTagsInput) {
+        // Divide o texto por vírgula, remove espaços em branco e filtra strings vazias
+        extraTags = extraTagsInput
+            .split(',')
+            .map(tag => tag.trim())
+            .filter(tag => tag.length > 0);
+    }
+    
+    // Combina as tags padrão e as tags extras
+    const tagsToRemove = [...defaultTags, ...extraTags];
+    // -----------------------------------------
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        let xmlText = e.target.result;
+
+        // 1. FASE DE SUBSTITUIÇÃO (Troca <tPag>X</tPag> por <tPag>99</tPag>)
+        // A Regex busca <tPag>, captura o conteúdo (o valor atual) e a tag de fechamento, 
+        // e substitui o match completo pelo <tPag>99</tPag>
+        const regexTPag = new RegExp(`(<tPag>)([\\s\\S]*?)(<\/tPag>)`, 'gi');
+        xmlText = xmlText.replace(regexTPag, '<tPag>99</tPag>');
+        
+        // FASE DE LIMPEZA (Remoção de Tags)
+        
+        // Remove declarações XML/DOCTYPE iniciais
+        xmlText = xmlText.replace(/<\?xml[^>]*\?>/gi, '').trim();
+        
+        tagsToRemove.forEach(tag => {
+            // Regex OTIMIZADO e seguro para tags com conteúdo (simples ou complexo)
+            let regexSafe = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'gi');
+            xmlText = xmlText.replace(regexSafe, '');
+            
+            // Regex extra para limpar tags vazias (como <tag></tag> ou <tag>   </tag>)
+            let regexEmpty = new RegExp(`<${tag}[^>]*>\\s*<\\/${tag}>`, 'gi');
+            xmlText = xmlText.replace(regexEmpty, '');
+        });
+
+        // Opcional: Remover quebras de linha duplas/triplas
+        xmlText = xmlText.replace(/(\r\n|\n|\r){2,}/gm, '\n');
+
+
+        document.getElementById('output').value = xmlText.trim();
+    };
+
+    reader.readAsText(file);
+}
+
+function exportXML() {
+    const content = document.getElementById('output').value;
+
+    if (!content) {
+        alert('Nenhum XML processado para exportar.');
+        return;
+    }
+
+    const fileName = originalFileName + '_corrigido.xml';
+
+    // Para garantir que o XML tenha a declaração inicial
+    const finalContent = `<?xml version="1.0" encoding="UTF-8"?>\n${content}`;
+    
+    const blob = new Blob([finalContent], { type: 'text/xml;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Análise de XML da NF-e</title>
+
+<link rel="stylesheet" href="styles.css"> 
+
+<style>
+    /* Estilos Específicos para a tela de Análise de XML */
+
+    /* Área principal - Layout Flexbox de Duas Colunas */
+    .main-content-area {
+        display: flex;
+        justify-content: center; 
+        gap: 20px; 
+        padding: 40px 20px;
+        max-width: 1200px; 
+        margin: 0 auto; 
+        box-sizing: border-box;
+        min-height: calc(100vh - 80px);
+    }
+
+    /* Painel de Análise (Card) - Largura Específica */
+    .card.analysis-panel {
+        max-width: 700px; 
+    }
+
+    /* Grupo de Botões acima do textarea */
+    .button-group-top {
+        display: flex;
+        gap: 10px;
+        margin-top: 25px;
+    }
+    
+    /* Botão Secundário (Exportar) - Largura Específica */
+    button.secondary-btn {
+        width: 120px; 
+        letter-spacing: normal; 
+    }
+
+    /* --- Estilos da Barra Lateral (Sidebar) --- */
+    .sidebar {
+        width: 100%;
+        max-width: 250px;
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+        border: 1px solid #e0e6ef;
+        height: fit-content; 
+        align-self: flex-start; 
+    }
+
+    .sidebar h3 {
+        margin-top: 0;
+        color: #1b56ab;
+        font-weight: 600;
+        font-size: 18px;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #e0e6ef;
+        padding-bottom: 10px;
+    }
+
+    .sidebar-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Estilo dos Botões da Sidebar */
+    .sidebar-btn {
+        width: 100%;
+        text-align: left;
+        background: #f8f9fa; 
+        color: #333;
+        border: 1px solid #c9d2e0;
+        padding: 12px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 500;
+        transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .sidebar-btn:hover:not(:disabled) {
+        background: #e0e6ef;
+        color: #1b56ab;
+        border-color: #1b56ab;
+    }
+    
+    .sidebar-btn.active {
+        background: #39a388; 
+        color: white;
+        border-color: #39a388;
+        font-weight: 600;
+    }
+
+    .sidebar-btn:disabled {
+        background: #e9ecef;
+        color: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    
+    /* Media Query para telas menores */
+    @media (max-width: 800px) {
+        .main-content-area {
+            flex-direction: column; 
+            align-items: center;
+        }
+        .card {
+            padding: 30px 20px;
+            max-width: 100%;
+        }
+        .sidebar {
+            max-width: 100%;
+            margin-top: 20px;
+        }
+        
+        .button-group-top {
+            flex-direction: column;
+            gap: 5px;
+        }
+        button.secondary-btn {
+            width: 100%;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <div id="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        XML Analyzer
+    </div>
+    
+    <nav class="main-menu">
+        <ul>
+            <li><a href="index.html">Início</a></li>
+            <li><a href="Mapa NFCe Consulta.html">Consulta por Estado</a></li>
+            <li><a href="analise_xml.html">Análise de XML</a></li>
+            <li><a href="xml_cleaner.html">Limpar XML</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="main-content-area">
+    
+    <div class="card analysis-panel">
+        
+        <h2>Análise Rápida de XML da NF-e</h2>
+        
+        <label for="xmlFile">Importar XML da NF-e:</label>
+        <input type="file" id="xmlFile" accept=".xml">
+        
+        <div class="button-group-top">
+            <button class="primary-btn" id="processXmlButton">Processar XML</button>
+            <button class="secondary-btn" id="exportResultButton" disabled>Exportar Resultado (.txt)</button>
+        </div>
+        
+        <label for="output">Resultado da Análise:</label>
+        <textarea id="output" placeholder="O resultado da análise aparecerá aqui após o processamento do XML..."></textarea>
+        
+
+    </div>
+
+    <div class="sidebar">
+        <h3>Opções de Agrupamento/Filtro</h3>
+        <div class="sidebar-options">
+            <button class="sidebar-btn" id="nfeDataButton" disabled>Dados da NF-e</button> 
+            <hr style="border: 0; border-top: 1px solid #e0e6ef; margin: 5px 0;">
+
+            <button class="sidebar-btn" id="cstGroupButton" disabled>Agrupar por CST/CSOSN</button>
+            <button class="sidebar-btn" id="unitCheckButton" disabled>Conferência de Unidades</button>
+            
+            <button class="sidebar-btn" id="ncmGroupButton" disabled>Agrupar por NCM</button> 
+            <button class="sidebar-btn" id="cfopGroupButton" disabled>Agrupar por CFOP</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let xmlDoc = null; 
+    const fileInput = document.getElementById('xmlFile');
+    const outputArea = document.getElementById('output');
+    const processButton = document.getElementById('processXmlButton');
+    const exportButton = document.getElementById('exportResultButton');
+    
+    // Referências aos Botões da Sidebar
+    const nfeDataButton = document.getElementById('nfeDataButton'); 
+    const ncmGroupButton = document.getElementById('ncmGroupButton');
+    const cfopGroupButton = document.getElementById('cfopGroupButton');
+    const cstGroupButton = document.getElementById('cstGroupButton'); 
+    const unitCheckButton = document.getElementById('unitCheckButton'); 
+
+
+    /**
+     * Função auxiliar para extrair o valor de uma tag.
+     */
+    function getTagValue(parentNode, tagName) {
+        const node = parentNode.getElementsByTagName(tagName)[0];
+        return node && node.textContent ? node.textContent.trim() : '';
+    }
+    
+    /**
+     * Auxiliar para formatação monetária (opcional, mas bom para a saída)
+     */
+    function formatCurrency(value) {
+        const num = parseFloat(value);
+        if (isNaN(num)) return 'R$ 0,00';
+        return `R$ ${num.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+    }
+
+    /**
+     * Auxiliar para formatar números (quantidades)
+     */
+    function formatQuantity(value) {
+        const num = parseFloat(value);
+        if (isNaN(num)) return '0';
+        // Formata com 4 casas decimais para quantidade
+        return num.toFixed(4).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    /**
+     * Função para ativar/desativar botões de análise/exportação.
+     */
+    function setAnalysisButtonsState(state) {
+        nfeDataButton.disabled = !state;
+        ncmGroupButton.disabled = !state;
+        cfopGroupButton.disabled = !state;
+        cstGroupButton.disabled = !state; 
+        unitCheckButton.disabled = !state; 
+        exportButton.disabled = !state;
+    }
+
+    /**
+     * Função para limpar o estado ativo de todos os botões da sidebar.
+     */
+    function clearActiveButtons() {
+        document.querySelectorAll('.sidebar-btn').forEach(btn => btn.classList.remove('active'));
+    }
+
+    // --- 1. Processar XML ---
+    processButton.addEventListener('click', () => {
+        const file = fileInput.files[0];
+        if (!file) {
+            outputArea.value = "Por favor, selecione um arquivo XML da NF-e para processar.";
+            xmlDoc = null;
+            setAnalysisButtonsState(false);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const xmlString = e.target.result;
+            try {
+                const parser = new DOMParser();
+                xmlDoc = parser.parseFromString(xmlString, "application/xml");
+
+                if (xmlDoc.getElementsByTagName("parsererror").length > 0) {
+                    throw new Error("Erro ao analisar o XML. Verifique a formatação do arquivo.");
+                }
+
+                outputArea.value = "XML carregado e pronto para análise. Selecione uma opção lateral.";
+                setAnalysisButtonsState(true);
+                clearActiveButtons(); 
+
+            } catch (error) {
+                outputArea.value = `Erro de processamento: ${error.message}`;
+                xmlDoc = null;
+                setAnalysisButtonsState(false);
+            }
+        };
+        reader.readAsText(file);
+    });
+    
+    // --- 2. Dados da NF-e ---
+    nfeDataButton.addEventListener('click', () => {
+        if (!xmlDoc) return;
+
+        clearActiveButtons();
+        nfeDataButton.classList.add('active');
+
+        let outputText = "--- Dados Principais da NF-e ---\n\n";
+        
+        const infNFe = xmlDoc.getElementsByTagName('infNFe')[0];
+        const ide = xmlDoc.getElementsByTagName('ide')[0];
+        const ICMSTot = xmlDoc.querySelector('ICMSTot');
+
+        // Chave de Acesso
+        if (infNFe && infNFe.getAttribute('Id')) {
+            const chNFe = infNFe.getAttribute('Id').replace('NFe', '');
+            outputText += `Chave de Acesso: ${chNFe}\n`;
+        }
+        
+        if (ide) {
+            const nNF = getTagValue(ide, 'nNF');
+            const serie = getTagValue(ide, 'serie');
+            const dhEmi = getTagValue(ide, 'dhEmi');
+            const tpNF = getTagValue(ide, 'tpNF');
+            const natOp = getTagValue(ide, 'natOp');
+            const finNFe = getTagValue(ide, 'finNFe');
+
+            outputText += `Número da Nota: ${nNF} / Série: ${serie}\n`;
+            outputText += `Data/Hora Emissão: ${dhEmi ? new Date(dhEmi).toLocaleString('pt-BR') : 'Não Informada'}\n`;
+            outputText += `Natureza da Operação: ${natOp}\n`;
+            outputText += `Tipo de Operação (tpNF): ${tpNF === '0' ? '0 - ENTRADA' : '1 - SAÍDA'}\n`;
+            outputText += `Finalidade (finNFe): ${finNFe}\n\n`;
+        }
+        
+        // Emitente (emit)
+        const emit = xmlDoc.getElementsByTagName('emit')[0];
+        if (emit) {
+            const xNomeEmit = getTagValue(emit, 'xNome');
+            const CNPJEmit = getTagValue(emit, 'CNPJ');
+            const IE = getTagValue(emit, 'IE');
+            
+            outputText += `--- DADOS DO EMITENTE ---\n`;
+            outputText += `Razão Social: ${xNomeEmit}\n`;
+            outputText += `CNPJ: ${CNPJEmit}\n`;
+            outputText += `Inscrição Estadual: ${IE}\n\n`;
+        }
+
+        // Destinatário (dest)
+        const dest = xmlDoc.getElementsByTagName('dest')[0];
+        if (dest) {
+            const xNomeDest = getTagValue(dest, 'xNome');
+            const CNPJDest = getTagValue(dest, 'CNPJ') || getTagValue(dest, 'CPF');
+            
+            outputText += `--- DADOS DO DESTINATÁRIO ---\n`;
+            outputText += `Razão Social: ${xNomeDest}\n`;
+            outputText += `CNPJ/CPF: ${CNPJDest || 'Não Informado'}\n\n`;
+        }
+        
+        // Totais (Geral)
+        if(ICMSTot) {
+            const vNF = getTagValue(ICMSTot, 'vNF');
+            const vProd = getTagValue(ICMSTot, 'vProd');
+            
+            outputText += `--- VALORES GERAIS (ICMSTot) ---\n`;
+            outputText += `Valor Total da Nota (vNF): ${formatCurrency(vNF)}\n`;
+            outputText += `Valor Total dos Produtos (vProd): ${formatCurrency(vProd)}\n`;
+        }
+        
+        outputArea.value = outputText;
+    });
+
+    // --- 3. Agrupar por CST/CSOSN (NOVA FUNÇÃO) ---
+    cstGroupButton.addEventListener('click', () => {
+        if (!xmlDoc) return;
+
+        clearActiveButtons();
+        cstGroupButton.classList.add('active');
+
+        const items = xmlDoc.querySelectorAll('det'); 
+        if (items.length === 0) {
+            outputArea.value = "Nenhum item de produto (<det>) encontrado neste XML.";
+            return;
+        }
+
+        const groupedByCST = {};
+        let outputText = "--- Análise de Agrupamento por CST/CSOSN (ICMS) ---\n\n";
+
+        items.forEach((det) => {
+            const itemPos = det.getAttribute('nItem'); 
+            const prod = det.getElementsByTagName('prod')[0];
+            const imposto = det.getElementsByTagName('imposto')[0];
+            
+            const xProd = getTagValue(prod, 'xProd'); 
+            
+            // Busca o grupo ICMS e tenta encontrar CST ou CSOSN
+            let CST_CODE = 'NÃO ENCONTRADO';
+            const icmsGroup = imposto ? imposto.querySelector('ICMS') : null;
+
+            if (icmsGroup) {
+                // Percorre os filhos do ICMS (ICMS00, ICMS40, ICMSSN102, etc.)
+                const icmsChild = icmsGroup.children[0]; 
+                if (icmsChild) {
+                    CST_CODE = getTagValue(icmsChild, 'CST') || getTagValue(icmsChild, 'CSOSN');
+                }
+            }
+
+            const itemDetails = {
+                posicao: itemPos,
+                descricao: xProd,
+            };
+
+            if (CST_CODE) {
+                if (!groupedByCST[CST_CODE]) {
+                    groupedByCST[CST_CODE] = [];
+                }
+                groupedByCST[CST_CODE].push(itemDetails);
+            }
+        });
+
+        // Formatar a saída
+        const sortedCSTs = Object.keys(groupedByCST).sort();
+        
+        sortedCSTs.forEach(CST => {
+            outputText += `==================================================\n`;
+            outputText += `CST/CSOSN: ${CST} (${groupedByCST[CST].length} itens)\n`;
+            outputText += `==================================================\n`;
+            
+            groupedByCST[CST].forEach(item => {
+                outputText += `  - Posição XML (${item.posicao}) | ${item.descricao}\n`;
+            });
+            outputText += "\n";
+        });
+        
+        outputArea.value = outputText;
+    });
+
+    // --- 4. Conferência de Unidades (NOVA FUNÇÃO) ---
+    unitCheckButton.addEventListener('click', () => {
+        if (!xmlDoc) return;
+
+        clearActiveButtons();
+        unitCheckButton.classList.add('active');
+
+        const items = xmlDoc.querySelectorAll('det'); 
+        if (items.length === 0) {
+            outputArea.value = "Nenhum item de produto (<det>) encontrado neste XML.";
+            return;
+        }
+
+        let outputText = "--- Conferência de Unidades (uCom vs uTrib) ---\n\n";
+        let hasDivergence = false;
+
+        items.forEach((det) => {
+            const itemPos = det.getAttribute('nItem'); 
+            const prod = det.getElementsByTagName('prod')[0];
+            
+            // Dados Comerciais
+            const uCom = getTagValue(prod, 'uCom'); 
+            const qCom = parseFloat(getTagValue(prod, 'qCom'));
+            const vUnCom = parseFloat(getTagValue(prod, 'vUnCom'));
+            
+            // Dados Tributáveis
+            const uTrib = getTagValue(prod, 'uTrib'); 
+            const qTrib = parseFloat(getTagValue(prod, 'qTrib'));
+            const vUnTrib = parseFloat(getTagValue(prod, 'vUnTrib'));
+
+            // Validações
+            const diffUnit = (uCom !== uTrib);
+            // Calcula diferença absoluta no valor total unitário (vUn * q) para evitar float errors
+            const vTotalCom = vUnCom * qCom;
+            const vTotalTrib = vUnTrib * qTrib;
+            const diffValue = Math.abs(vTotalCom - vTotalTrib) > 0.005; 
+
+            if (diffUnit || diffValue) {
+                hasDivergence = true;
+                
+                outputText += `==================================================\n`;
+                outputText += `ITEM ${itemPos}: ${getTagValue(prod, 'xProd')} (DIVERGÊNCIA)\n`;
+                outputText += `==================================================\n`;
+                
+                if (diffUnit) {
+                    outputText += `  - UNIDADE: Comercial (${uCom}) DIFERE de Tributável (${uTrib})\n`;
+                }
+
+                if (diffValue) {
+                    outputText += `  - QUANTIDADE: Comercial (${formatQuantity(qCom)}) | Tributável (${formatQuantity(qTrib)})\n`;
+                    outputText += `  - VLR UNITÁRIO: Comercial (${formatCurrency(vUnCom)}) | Tributável (${formatCurrency(vUnTrib)})\n`;
+                    outputText += `  - VLR TOTAL: Comercial (${formatCurrency(vTotalCom)}) | Tributável (${formatCurrency(vTotalTrib)})\n`;
+                    outputText += `  * OBS: O valor total COMERCIAL não é igual ao total TRIBUTÁVEL.\n`;
+                }
+                
+                outputText += "\n";
+            }
+        });
+        
+        if (!hasDivergence) {
+            outputText += "Nenhuma divergência de Unidades/Valores Unitários (Comercial vs Tributável) encontrada."
+        }
+        
+        outputArea.value = outputText;
+    });
+
+    // --- 5. Agrupar por NCM (Função Existente) ---
+    ncmGroupButton.addEventListener('click', () => {
+        if (!xmlDoc) return;
+        
+        clearActiveButtons();
+        ncmGroupButton.classList.add('active');
+
+        const items = xmlDoc.querySelectorAll('det'); 
+        
+        if (items.length === 0) {
+            outputArea.value = "Nenhum item de produto (<det>) encontrado neste XML.";
+            return;
+        }
+
+        const groupedByNCM = {};
+        const noNCM = [];
+        let outputText = "--- Análise de Agrupamento por NCM ---\n\n";
+
+        items.forEach((det, index) => {
+            const itemPos = det.getAttribute('nItem'); 
+            const prod = det.getElementsByTagName('prod')[0];
+            
+            const cProd = getTagValue(prod, 'cProd'); 
+            const xProd = getTagValue(prod, 'xProd'); 
+            const NCM = getTagValue(prod, 'NCM'); 
+
+            const itemDetails = {
+                posicao: itemPos,
+                codigo: cProd,
+                descricao: xProd,
+            };
+
+            if (NCM) {
+                if (!groupedByNCM[NCM]) {
+                    groupedByNCM[NCM] = [];
+                }
+                groupedByNCM[NCM].push(itemDetails);
+            } else {
+                noNCM.push(itemDetails);
+            }
+        });
+
+        for (const NCM in groupedByNCM) {
+            outputText += `==================================================\n`;
+            outputText += `NCM: ${NCM} (${groupedByNCM[NCM].length} itens)\n`;
+            outputText += `==================================================\n`;
+            
+            groupedByNCM[NCM].forEach(item => {
+                outputText += `  - Posição XML (${item.posicao}) | Codigo: ${item.codigo}\n`;
+                outputText += `    Descrição: ${item.descricao}\n`;
+            });
+            outputText += "\n";
+        }
+        
+        if (noNCM.length > 0) {
+            outputText += `\n##################################################\n`;
+            outputText += `# ITENS SEM NCM PREENCHIDO (${noNCM.length} itens) #\n`;
+            outputText += `##################################################\n`;
+            
+            noNCM.forEach(item => {
+                outputText += `  - Posição XML (${item.posicao}) | Codigo: ${item.codigo}\n`;
+                outputText += `    Descrição: ${item.descricao}\n`;
+            });
+        }
+        
+        outputArea.value = outputText;
+    });
+
+    // --- 6. Agrupar por CFOP (Função Existente) ---
+    cfopGroupButton.addEventListener('click', () => {
+        if (!xmlDoc) return;
+        
+        clearActiveButtons();
+        cfopGroupButton.classList.add('active');
+
+
+        const items = xmlDoc.querySelectorAll('det'); 
+        
+        if (items.length === 0) {
+            outputArea.value = "Nenhum item de produto (<det>) encontrado neste XML.";
+            return;
+        }
+
+        const groupedByCFOP = {};
+        const noCFOP = [];
+        let outputText = "--- Análise de Agrupamento por CFOP ---\n\n";
+
+        items.forEach((det, index) => {
+            const itemPos = det.getAttribute('nItem'); 
+            const prod = det.getElementsByTagName('prod')[0];
+            
+            const cProd = getTagValue(prod, 'cProd'); 
+            const xProd = getTagValue(prod, 'xProd'); 
+            const CFOP = getTagValue(prod, 'CFOP'); 
+
+            const itemDetails = {
+                posicao: itemPos,
+                codigo: cProd,
+                descricao: xProd,
+            };
+
+            if (CFOP) {
+                if (!groupedByCFOP[CFOP]) {
+                    groupedByCFOP[CFOP] = [];
+                }
+                groupedByCFOP[CFOP].push(itemDetails);
+            } else {
+                noCFOP.push(itemDetails);
+            }
+        });
+
+        // Formatar a saída
+        for (const CFOP in groupedByCFOP) {
+            outputText += `==================================================\n`;
+            outputText += `CFOP: ${CFOP} (${groupedByCFOP[CFOP].length} itens)\n`;
+            outputText += `==================================================\n`;
+            
+            groupedByCFOP[CFOP].forEach(item => {
+                outputText += `  - Posição XML (${item.posicao}) | Codigo: ${item.codigo}\n`;
+                outputText += `    Descrição: ${item.descricao}\n`;
+            });
+            outputText += "\n";
+        }
+        
+        if (noCFOP.length > 0) {
+            outputText += `\n##################################################\n`;
+            outputText += `# ITENS SEM CFOP PREENCHIDO (${noCFOP.length} itens) #\n`;
+            outputText += `##################################################\n`;
+            
+            noCFOP.forEach(item => {
+                outputText += `  - Posição XML (${item.posicao}) | Codigo: ${item.codigo}\n`;
+                outputText += `    Descrição: ${item.descricao}\n`;
+            });
+        }
+        
+        outputArea.value = outputText;
+    });
+
+    // --- 7. Exportar Resultado ---
+    exportButton.addEventListener('click', () => {
+        const content = outputArea.value;
+        
+        if (!content || content.trim() === "XML carregado e pronto para análise. Selecione uma opção lateral." || content.trim().startsWith("Por favor, selecione")) {
+            alert("Não há resultado de análise para exportar. Execute uma análise primeiro.");
+            return;
+        }
+        
+        const blob = new Blob([content], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        
+        let filename = 'resultado_analise.txt';
+        
+        if (xmlDoc) {
+            const infNFe = xmlDoc.getElementsByTagName('infNFe')[0];
+            if (infNFe && infNFe.getAttribute('Id')) {
+                const chave = infNFe.getAttribute('Id').replace('NFe', ''); 
+                filename = `analise_${chave}.txt`;
+            }
+        }
+        
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+    });
+
+</script>
+
+
+</body>
+</html>
