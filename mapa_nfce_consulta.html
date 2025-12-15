@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta NFC-e por Estado - NFC-e Tools</title>
+    <title>Consulta NFC-e por Estado - Support Tools</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -41,12 +41,12 @@
                     <line x1="16" y1="17" x2="8" y2="17"></line>
                     <polyline points="10 9 9 9 8 9"></polyline>
                 </svg>
-                NFC-e Tools
+                Support Tools
             </a>
             <button class="mobile-toggle" aria-label="Abrir Menu">☰</button>
             <nav class="nav-links">
                 <a href="index.html" class="nav-link">Início</a>
-                <a href="mapa_nfce_consulta.html" class="nav-link">Consulta por Estado</a>
+                <a href="mapa_nfce_consulta.html" class="nav-link">Consulta NFC-e por Estado</a>
                 <a href="analise_xml.html" class="nav-link">Análise de XML</a>
                 <a href="xml_cleaner.html" class="nav-link">Limpar XML</a>
             </nav>
@@ -54,7 +54,7 @@
     </header>
 
     <main class="container">
-        <h2 class="mt-4 mb-2 text-center" style="color: var(--primary-color);">Consulta por Estado</h2>
+        <h2 class="mt-4 mb-2 text-center" style="color: var(--primary-color);">Consulta NFC-e por Estado</h2>
         <p class="text-center mb-4">Selecione um estado no mapa para acessar o sistema de consulta.</p>
 
         <div id="tooltip"></div>
@@ -171,10 +171,10 @@
                     <text class="state-label" x="165" y="260">RO</text>
                     <text class="state-label" x="197" y="60">RR</text>
                     <text class="state-label" x="320" y="570">RS</text>
-                    <text class="state-label" x="375" y="525">SC</text>
-                    <text class="state-label" x="585" y="255">SE</text>
+                    <text class="state-label" x="370" y="525">SC</text>
+                    <text class="state-label" x="580" y="255">SE</text>
                     <text class="state-label" x="400" y="445">SP</text>
-                    <text class="state-label" x="402" y="245">TO</text>
+                    <text class="state-label" x="390" y="245">TO</text>
                 </svg>
             </div>
 
@@ -190,34 +190,65 @@
     <script src="script.js"></script>
     <script>
         // Data for States (Same as before)
-        const statesData = [
-            { name: 'Acre', id: 'BR-AC' }, { name: 'Alagoas', id: 'BR-AL' }, { name: 'Amapá', id: 'BR-AP' },
-            { name: 'Amazonas', id: 'BR-AM' }, { name: 'Bahia', id: 'BR-BA' }, { name: 'Ceará', id: 'BR-CE' },
-            { name: 'Distrito Federal', id: 'BR-DF' }, { name: 'Espírito Santo', id: 'BR-ES' }, { name: 'Goiás', id: 'BR-GO' },
-            { name: 'Maranhão', id: 'BR-MA' }, { name: 'Minas Gerais', id: 'BR-MG' }, { name: 'Mato Grosso do Sul', id: 'BR-MS' },
-            { name: 'Mato Grosso', id: 'BR-MT' }, { name: 'Pará', id: 'BR-PA' }, { name: 'Paraíba', id: 'BR-PB' },
-            { name: 'Pernambuco', id: 'BR-PE' }, { name: 'Piauí', id: 'BR-PI' }, { name: 'Paraná', id: 'BR-PR' },
-            { name: 'Rio de Janeiro', id: 'BR-RJ' }, { name: 'Rio Grande do Norte', id: 'BR-RN' }, { name: 'Rondônia', id: 'BR-RO' },
-            { name: 'Roraima', id: 'BR-RR' }, { name: 'Rio Grande do Sul', id: 'BR-RS' }, { name: 'Santa Catarina', id: 'BR-SC' },
-            { name: 'Sergipe', id: 'BR-SE' }, { name: 'São Paulo', id: 'BR-SP' }, { name: 'Tocantins', id: 'BR-TO' }
-        ];
+    const statesData = [
+        { name: 'Acre', id: 'BR-AC' },
+        { name: 'Alagoas', id: 'BR-AL' },
+        { name: 'Amapá', id: 'BR-AP' },
+        { name: 'Amazonas', id: 'BR-AM' },
+        { name: 'Bahia', id: 'BR-BA' },
+        { name: 'Ceará', id: 'BR-CE' },
+        { name: 'Distrito Federal', id: 'BR-DF' },
+        { name: 'Espírito Santo', id: 'BR-ES' },
+        { name: 'Goiás', id: 'BR-GO' },
+        { name: 'Maranhão', id: 'BR-MA' },
+        { name: 'Minas Gerais', id: 'BR-MG' },
+        { name: 'Mato Grosso do Sul', id: 'BR-MS' },
+        { name: 'Mato Grosso', id: 'BR-MT' },
+        { name: 'Pará', id: 'BR-PA' },
+        { name: 'Paraíba', id: 'BR-PB' },
+        { name: 'Pernambuco', id: 'BR-PE' },
+        { name: 'Piauí', id: 'BR-PI' },
+        { name: 'Paraná', id: 'BR-PR' },
+        { name: 'Rio de Janeiro', id: 'BR-RJ' },
+        { name: 'Rio Grande do Norte', id: 'BR-RN' },
+        { name: 'Rondônia', id: 'BR-RO' },
+        { name: 'Roraima', id: 'BR-RR' },
+        { name: 'Rio Grande do Sul', id: 'BR-RS' },
+        { name: 'Santa Catarina', id: 'BR-SC' },
+        { name: 'Sergipe', id: 'BR-SE' },
+        { name: 'São Paulo', id: 'BR-SP' },
+        { name: 'Tocantins', id: 'BR-TO' }
+    ];
 
-        const stateLinks = {
-            'BR-AC': 'http://www.sefaznet.ac.gov.br/nfce/consulta', 'BR-AL': 'http://nfce.sefaz.al.gov.br/consultaNFCe.htm',
-            'BR-AM': 'https://sistemas.sefaz.am.gov.br/nfceweb/formConsulta.do', 'BR-AP': 'https://www.sefaz.ap.gov.br/sate/seg/SEGf_AcessarFuncao.jsp?cdFuncao=FIS_1261',
-            'BR-BA': 'http://nfe.sefaz.ba.gov.br/servicos/nfce/Modulos/Geral/NFCEC_consulta_chave_acesso.aspx', 'BR-CE': 'http://nfce.sefaz.ce.gov.br/pages/consultaNota.jsf',
-            'BR-DF': 'https://ww1.receita.fazenda.df.gov.br/documentosfiscais/consultar', 'BR-ES': 'http://app.sefaz.es.gov.br/ConsultaNFCe',
-            'BR-GO': 'http://www.nfce.go.gov.br/post/ver/214344/consulta-nfce', 'BR-MA': 'http://www.nfce.sefaz.ma.gov.br/portal/consultaNFe.do?method=preFilterCupom&',
-            'BR-MG': 'http://nfce.fazenda.mg.gov.br/portalnfce/sistema/consultaarg.xhtml', 'BR-MS': 'http://www.dfe.ms.gov.br/nfce',
-            'BR-MT': 'http://www.sefaz.mt.gov.br/nfce/consultanfce', 'BR-PA': 'https://appnfc.sefa.pa.gov.br/portal/view/consultas/nfce/consultanfce.seam',
-            'BR-PB': 'https://www.sefaz.pb.gov.br/servirtual/documentos-fiscais/nfc-e/consultar-nfc-e', 'BR-PE': 'http://nfce.sefaz.pe.gov.br/nfce/consulta',
-            'BR-PI': 'https://www.sefaz.pi.gov.br/nfce/index.jsf', 'BR-PR': 'https://sped.fazenda.pr.gov.br/NFCe/webservices/sped/nfce/completa',
-            'BR-RJ': 'http://www.nfce.fazenda.rj.gov.br/consulta', 'BR-RN': 'http://nfce.set.rn.gov.br/portalDFE/NFCe/ConsultaNFCe.aspx',
-            'BR-RO': 'https://www.nfce.sefin.ro.gov.br', 'BR-RR': 'https://portalapp.sefaz.rr.gov.br/nfce/consulta',
-            'BR-RS': 'https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx', 'BR-SC': 'https://sat.sef.sc.gov.br',
-            'BR-SE': 'http://www.nfce.se.gov.br/portal/portalNoticias.jsp', 'BR-SP': 'https://www.nfce.fazenda.sp.gov.br/NFCeConsultaPublica/Paginas/ConsultaPublica.aspx',
-            'BR-TO': 'http://www.sefaz.to.gov.br/nfce/consulta.jsf'
-        };
+    const stateLinks = {
+        'BR-AC': 'http://www.sefaznet.ac.gov.br/nfce/consulta', // Acre
+        'BR-AL': 'http://nfce.sefaz.al.gov.br/consultaNFCe.htm', // Alagoas
+        'BR-AM': 'https://sistemas.sefaz.am.gov.br/nfceweb/formConsulta.do', // Amazonas
+        'BR-AP': 'https://www.sefaz.ap.gov.br/sate/seg/SEGf_AcessarFuncao.jsp?cdFuncao=FIS_1261', // Amapá
+        'BR-BA': 'http://nfe.sefaz.ba.gov.br/servicos/nfce/Modulos/Geral/NFCEC_consulta_chave_acesso.aspx', // Bahia
+        'BR-CE': 'http://nfce.sefaz.ce.gov.br/pages/consultaNota.jsf', // Ceará
+        'BR-DF': 'https://ww1.receita.fazenda.df.gov.br/documentosfiscais/consultar', // Distrito Federal
+        'BR-ES': 'http://app.sefaz.es.gov.br/ConsultaNFCe', // Espírito Santo
+        'BR-GO': 'http://www.nfce.go.gov.br/post/ver/214344/consulta-nfce', // Goiás
+        'BR-MA': 'http://www.nfce.sefaz.ma.gov.br/portal/consultaNFe.do?method=preFilterCupom&', // Maranhão
+        'BR-MG': 'http://nfce.fazenda.mg.gov.br/portalnfce/sistema/consultaarg.xhtml', // Minas Gerais
+        'BR-MS': 'http://www.dfe.ms.gov.br/nfce', // Mato Grosso do Sul
+        'BR-MT': 'http://www.sefaz.mt.gov.br/nfce/consultanfce', // Mato Grosso
+        'BR-PA': 'https://appnfc.sefa.pa.gov.br/portal/view/consultas/nfce/consultanfce.seam', // Pará
+        'BR-PB': 'https://www.sefaz.pb.gov.br/servirtual/documentos-fiscais/nfc-e/consultar-nfc-e', // Paraíba
+        'BR-PE': 'http://nfce.sefaz.pe.gov.br/nfce/consulta', // Pernambuco
+        'BR-PI': 'https://www.sefaz.pi.gov.br/nfce/index.jsf', // Piauí
+        'BR-PR': 'https://sped.fazenda.pr.gov.br/NFCe/webservices/sped/nfce/completa', // Paraná
+        'BR-RJ': 'http://www.nfce.fazenda.rj.gov.br/consulta', // Rio de Janeiro
+        'BR-RN': 'http://nfce.set.rn.gov.br/portalDFE/NFCe/ConsultaNFCe.aspx', // Rio Grande do Norte
+        'BR-RO': 'https://www.nfce.sefin.ro.gov.br', // Rondônia
+        'BR-RR': 'https://portalapp.sefaz.rr.gov.br/nfce/consulta', // Roraima
+        'BR-RS': 'https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx', // Rio Grande do Sul
+        'BR-SC': 'https://sat.sef.sc.gov.br', // Santa Catarina
+        'BR-SE': 'http://www.nfce.se.gov.br/portal/portalNoticias.jsp', // Sergipe
+        'BR-SP': 'https://www.nfce.fazenda.sp.gov.br/NFCeConsultaPublica/Paginas/ConsultaPublica.aspx', // São Paulo
+        'BR-TO': 'http://www.sefaz.to.gov.br/nfce/consulta.jsf' // Tocantins
+    };
 
         const tooltip = document.getElementById('tooltip');
         const statePaths = document.querySelectorAll('.state-path');
