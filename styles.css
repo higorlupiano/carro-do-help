@@ -601,3 +601,67 @@ input[type="file"] {
         transform: translateY(0);
     }
 }
+
+/* ==========================================================================
+   ICONE "I" (INFORMAÇÃO)
+   ========================================================================== */
+
+/* Estilo do ícone "i" */
+.info-icon {
+    position: relative;
+    display: inline-block;
+    cursor: help; /* Muda o cursor para ? */
+    color: #17a2b8; /* Cor azul informativo (pode mudar para o seu tema) */
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+/* Estilo da caixa de texto (Tooltip) - Inicialmente invisível */
+.info-icon .tooltip-text {
+    visibility: hidden;
+    width: 220px; /* Largura da caixa */
+    background-color: #333; /* Fundo escuro */
+    color: #fff; /* Texto branco */
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 0.85rem;
+    font-weight: normal;
+
+    /* Posicionamento */
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Faz aparecer acima do ícone */
+    left: 50%;
+    transform: translateX(-50%); /* Centraliza em relação ao ícone */
+    
+    /* Efeito de transição suave */
+    opacity: 0;
+    transition: opacity 0.3s;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Pequena seta apontando para baixo (opcional, mas fica bonito) */
+.info-icon .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+/* Mostra o tooltip quando passa o mouse */
+.info-icon:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.info-icon.svg-icon svg {
+    width: 18px;  /* Tamanho do ícone */
+    height: 20px;
+    vertical-align: middle; /* Alinha verticalmente com o texto */
+    margin-top: -10px; /* Ajuste fino de alinhamento se necessário */
+}
