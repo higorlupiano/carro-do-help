@@ -1,5 +1,4 @@
-/* 
-   ==========================================================================
+/* ==========================================================================
    DESIGN SYSTEM - CARRO DO HELP / NFC-E TOOLS
    Premium Modern UI w/ Glassmorphism & Vibrant Colors
    ========================================================================== 
@@ -7,34 +6,17 @@
 
 :root {
     /* --- COLOR PALETTE --- */
-    /* Primary: Deep Modern Blue/Indigo */
     --primary-color: #4f46e5;
-    /* Indigo 600 */
     --primary-hover: #4338ca;
-    /* Indigo 700 */
     --primary-light: #e0e7ff;
-    /* Indigo 100 */
-
-    /* Secondary: Vibrant Teal */
     --secondary-color: #0ea5e9;
-    /* Sky 500 */
     --secondary-hover: #0284c7;
-    /* Sky 600 */
-
-    /* Accent: Coral/Orange for CTA or Alerts */
     --accent-color: #f97316;
-    /* Orange 500 */
-
-    /* Neutral Scale */
     --bg-body: #f8fafc;
-    /* Slate 50 */
     --bg-card: #ffffff;
     --text-main: #0f172a;
-    /* Slate 900 */
     --text-muted: #64748b;
-    /* Slate 500 */
     --border-color: #e2e8f0;
-    /* Slate 200 */
 
     /* --- SHADOWS & BLUR --- */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -96,31 +78,16 @@ svg {
 }
 
 /* Typography Headings */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
     color: var(--text-main);
     font-weight: 700;
     line-height: 1.2;
     margin-bottom: 0.75rem;
 }
 
-h1 {
-    font-size: 2.5rem;
-    letter-spacing: -0.02em;
-}
-
-h2 {
-    font-size: 2rem;
-    letter-spacing: -0.01em;
-}
-
-h3 {
-    font-size: 1.5rem;
-}
+h1 { font-size: 2.5rem; letter-spacing: -0.02em; }
+h2 { font-size: 2rem; letter-spacing: -0.01em; }
+h3 { font-size: 1.5rem; }
 
 p {
     margin-bottom: 1rem;
@@ -143,33 +110,13 @@ p {
     align-items: center;
 }
 
-.text-center {
-    text-align: center;
-}
-
-.mt-1 {
-    margin-top: 0.5rem;
-}
-
-.mt-2 {
-    margin-top: 1rem;
-}
-
-.mt-4 {
-    margin-top: 2rem;
-}
-
-.mb-2 {
-    margin-bottom: 1rem;
-}
-
-.mb-4 {
-    margin-bottom: 2rem;
-}
-
-.hidden {
-    display: none !important;
-}
+.text-center { text-align: center; }
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-4 { margin-top: 2rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-4 { margin-bottom: 2rem; }
+.hidden { display: none !important; }
 
 /* ==========================================================================
    COMPONENT: NAVBAR (Header)
@@ -211,6 +158,7 @@ p {
 .nav-links {
     display: flex;
     gap: 8px;
+    align-items: center; /* Garante alinhamento vertical */
 }
 
 .nav-link {
@@ -220,6 +168,7 @@ p {
     padding: 10px 16px;
     border-radius: var(--radius-md);
     transition: all 0.2s ease;
+    display: inline-block;
 }
 
 .nav-link:hover {
@@ -344,9 +293,7 @@ p {
 /* ==========================================================================
    COMPONENT: FORMS & INPUTS
    ========================================================================== */
-.form-group {
-    margin-bottom: 1.5rem;
-}
+.form-group { margin-bottom: 1.5rem; }
 
 .form-label {
     display: block;
@@ -356,9 +303,7 @@ p {
     color: var(--text-main);
 }
 
-.form-input,
-.form-textarea,
-.form-select {
+.form-input, .form-textarea, .form-select {
     width: 100%;
     padding: 12px 16px;
     border: 1px solid var(--border-color);
@@ -369,8 +314,7 @@ p {
     background-color: #fcfcfc;
 }
 
-.form-input:focus,
-.form-textarea:focus {
+.form-input:focus, .form-textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px var(--primary-light);
@@ -381,12 +325,10 @@ p {
     min-height: 150px;
     resize: vertical;
     font-family: 'Consolas', 'Monaco', monospace;
-    /* Monospace for XML/Code */
     font-size: 0.9rem;
     color: #334155;
 }
 
-/* File Input Wrapper */
 input[type="file"] {
     background: white;
     padding: 10px;
@@ -405,10 +347,6 @@ input[type="file"] {
     gap: 24px;
     margin-top: 30px;
     margin-bottom: 30px;
-}
-
-.analysis-results {
-    /* Main area */
 }
 
 .analysis-sidebar {
@@ -497,14 +435,12 @@ input[type="file"] {
     transition: all 0.2s;
 }
 
-.state-list-btn:hover,
-.state-list-btn.hover-active {
+.state-list-btn:hover, .state-list-btn.hover-active {
     background-color: var(--primary-color);
     color: white;
     transform: translateX(4px);
 }
 
-/* SVG Map Styles */
 .state-path {
     fill: #cbd5e1;
     stroke: #ffffff;
@@ -517,7 +453,6 @@ input[type="file"] {
     fill: var(--primary-color);
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
     transform: translateY(-2px);
-    /* Subtle lift effect */
 }
 
 .state-label {
@@ -525,32 +460,300 @@ input[type="file"] {
     font-weight: 700;
     font-size: 13px;
     pointer-events: none;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.9);
 }
 
-/* Custom Scrollbar for list */
-.state-buttons-list::-webkit-scrollbar {
-    width: 6px;
+.state-buttons-list::-webkit-scrollbar { width: 6px; }
+.state-buttons-list::-webkit-scrollbar-track { background: #f1f1f1; }
+.state-buttons-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+/* ==========================================================================
+   ICONE "I" (INFORMAÇÃO)
+   ========================================================================== */
+.info-icon {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+    color: #17a2b8;
+    margin-left: 5px;
+    font-weight: bold;
 }
 
-.state-buttons-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
+.info-icon .tooltip-text {
+    visibility: hidden;
+    width: 220px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 0.85rem;
+    font-weight: normal;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
 }
 
-.state-buttons-list::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
+.info-icon .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+.info-icon:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.info-icon.svg-icon svg {
+    width: 18px;
+    height: 20px;
+    vertical-align: middle;
+    margin-top: -10px;
 }
 
 /* ==========================================================================
-   RESPONSIVE
+   PAGE: LABEL SIMULATOR
+   ========================================================================== */
+.simulator-wrapper {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.simulator-controls {
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.row-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.input-sm { width: 100%; padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; }
+
+.config-table { width: 100%; font-size: 0.85rem; border-collapse: collapse; }
+.config-table th { text-align: left; color: var(--text-muted); font-weight: 600; padding-bottom: 8px; }
+.config-table td { padding: 6px 4px; border-bottom: 1px solid var(--border-color); }
+
+.simulator-preview-area {
+    background: #e2e8f0;
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: sticky;
+    top: 90px;
+}
+
+.preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+
+.paper-container {
+    flex: 1;
+    overflow: auto; 
+    display: grid;
+    justify-items: center;
+    align-items: start;
+    padding: 20px;
+    background-color: #e2e8f0;
+}
+
+.simulated-paper {
+    background: white;
+    box-shadow: 0 0 20px rgba(0,0,0,0.15);
+    position: relative;
+    transform-origin: top center;
+    transition: width 0.3s, height 0.3s;
+    margin-bottom: 20px; 
+    flex-shrink: 0; 
+}
+
+.labels-grid {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.sim-label {
+    position: absolute;
+    border: 1px dashed #cbd5e1;
+    background: rgba(79, 70, 229, 0.03);
+    overflow: hidden;
+    box-sizing: border-box;
+    font-family: 'Courier New', monospace;
+    color: #000;
+}
+
+.sim-element {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.sim-barcode-img {
+    position: absolute;
+    object-fit: fill; 
+    display: block;
+}
+
+@media (max-width: 1024px) {
+    .simulator-wrapper { grid-template-columns: 1fr; }
+    .simulator-preview-area { position: static; height: 600px; }
+}
+
+/* ==========================================================================
+   DROPDOWN & SUBMENUS (NOVO)
+   ========================================================================== */
+.dropdown-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.dropdown-trigger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-family: var(--font-sans);
+    /* Herda estilos do .nav-link */
+}
+
+/* Menu Principal */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0; /* Alinha à direita do botão pai */
+    width: 240px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: 8px 0;
+    
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.2s ease;
+    z-index: 1100;
+}
+
+.dropdown-container:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Itens do Menu */
+.dropdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.dropdown-item:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+}
+
+/* Separador */
+.dropdown-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 6px 0;
+}
+
+/* Ajuste para links que não são sub-categorias */
+.dropdown-item.direct-link {
+    justify-content: flex-start;
+    padding-left: 16px; /* Alinhado com o texto das categorias */
+}
+
+/* Mantém o padrão de hover */
+.dropdown-item.direct-link:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+}
+
+/* --- LOGICA SUBMENU --- */
+.dropdown-sub-container {
+    position: relative;
+    width: 100%;
+}
+
+/* Submenu Padrão (Abre para Direita) */
+.dropdown-submenu {
+    position: absolute;
+    top: -8px;
+    left: 100%; 
+    margin-left: 5px;
+    
+    width: 200px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xl);
+    padding: 8px 0;
+    
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-10px);
+    transition: all 0.2s ease;
+    z-index: 1101;
+}
+
+/* Variante: Abre para Esquerda (Ativado via JS ou manual) */
+.dropdown-submenu.open-left {
+    left: auto !important;
+    right: 100%;
+    margin-left: 0;
+    margin-right: 5px;
+    transform: translateX(10px);
+}
+
+.dropdown-sub-container:hover .dropdown-submenu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+.dropdown-container:hover .dropdown-trigger > svg {
+    transform: rotate(180deg);
+    transition: transform 0.2s;
+}
+
+/* ==========================================================================
+   RESPONSIVE (MENU + DROPDOWN)
    ========================================================================== */
 @media (max-width: 768px) {
-
-    /* Navbar */
-    .mobile-toggle {
-        display: block;
-    }
+    .mobile-toggle { display: block; }
 
     .nav-links {
         display: none;
@@ -563,6 +766,7 @@ input[type="file"] {
         padding: 20px;
         box-shadow: var(--shadow-lg);
         border-bottom: 1px solid var(--border-color);
+        align-items: stretch; /* Estica os itens */
     }
 
     .nav-links.active {
@@ -576,232 +780,91 @@ input[type="file"] {
         padding: 14px;
     }
 
-    /* Layouts */
-    .analysis-container {
-        grid-template-columns: 1fr;
+    /* Mobile Dropdown resets */
+    .dropdown-container {
+        display: block;
+        width: 100%;
     }
 
-    .map-wrapper {
-        grid-template-columns: 1fr;
+    .dropdown-trigger {
+        width: 100%;
+        justify-content: center;
+        padding: 14px;
     }
 
-    .hero-title {
-        font-size: 2.5rem;
+    .dropdown-menu {
+        position: static;
+        width: 100%;
+        box-shadow: none;
+        border: none;
+        background: var(--bg-body);
+        display: none;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        padding-left: 0;
+    }
+
+    .dropdown-container:hover .dropdown-menu { display: block; }
+
+    .dropdown-submenu {
+        position: static;
+        width: 100%;
+        box-shadow: none;
+        border: none;
+        background: rgba(0,0,0,0.05);
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        display: none;
+        padding-left: 20px;
+        margin: 0;
+    }
+
+    .dropdown-sub-container:hover .dropdown-submenu { display: block; }
+    
+    .dropdown-item {
+        border-bottom: 1px solid var(--border-color);
     }
 }
 
 @keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* ==========================================================================
-   ICONE "I" (INFORMAÇÃO)
-   ========================================================================== */
-
-/* Estilo do ícone "i" */
-.info-icon {
-    position: relative;
-    display: inline-block;
-    cursor: help; /* Muda o cursor para ? */
-    color: #17a2b8; /* Cor azul informativo (pode mudar para o seu tema) */
-    margin-left: 5px;
-    font-weight: bold;
-}
-
-/* Estilo da caixa de texto (Tooltip) - Inicialmente invisível */
-.info-icon .tooltip-text {
-    visibility: hidden;
-    width: 220px; /* Largura da caixa */
-    background-color: #333; /* Fundo escuro */
-    color: #fff; /* Texto branco */
-    text-align: center;
-    border-radius: 6px;
-    padding: 8px;
-    font-size: 0.85rem;
-    font-weight: normal;
-
-    /* Posicionamento */
+/* Submenu fixo para a Esquerda */
+.dropdown-submenu {
     position: absolute;
-    z-index: 1;
-    bottom: 125%; /* Faz aparecer acima do ícone */
-    left: 50%;
-    transform: translateX(-50%); /* Centraliza em relação ao ícone */
+    top: -8px;
+    right: 100%;       /* Alinha na borda esquerda do item pai */
+    left: auto;
+    margin-right: 8px; /* Espaço entre o menu e o submenu */
     
-    /* Efeito de transição suave */
-    opacity: 0;
-    transition: opacity 0.3s;
-    box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
-}
-
-/* Pequena seta apontando para baixo (opcional, mas fica bonito) */
-.info-icon .tooltip-text::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #333 transparent transparent transparent;
-}
-
-/* Mostra o tooltip quando passa o mouse */
-.info-icon:hover .tooltip-text {
-    visibility: visible;
-    opacity: 1;
-}
-
-.info-icon.svg-icon svg {
-    width: 18px;  /* Tamanho do ícone */
-    height: 20px;
-    vertical-align: middle; /* Alinha verticalmente com o texto */
-    margin-top: -10px; /* Ajuste fino de alinhamento se necessário */
-}
-
-/* ==========================================================================
-   PAGE: LABEL SIMULATOR
-   ========================================================================== */
-.simulator-wrapper {
-    display: grid;
-    grid-template-columns: 350px 1fr; /* Coluna fixa para inputs, resto para preview */
-    gap: 24px;
-    align-items: start;
-}
-
-.simulator-controls {
-    /* Área de inputs com scroll se a tela for pequena na altura */
-    max-height: calc(100vh - 100px);
-    overflow-y: auto;
-    padding-right: 10px;
-}
-
-/* Helpers para o form */
-.row-2-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.input-sm {
-    width: 100%;
-    padding: 4px 8px;
+    width: 200px;
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xl);
+    padding: 8px 0;
+    
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(10px);
+    transition: all 0.2s ease;
+    z-index: 1101;
 }
 
-/* Tabela de configuração */
-.config-table {
-    width: 100%;
-    font-size: 0.85rem;
-    border-collapse: collapse;
+.dropdown-sub-container:hover .dropdown-submenu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
 }
 
-.config-table th {
-    text-align: left;
-    color: var(--text-muted);
-    font-weight: 600;
-    padding-bottom: 8px;
-}
-
-.config-table td {
-    padding: 6px 4px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-/* Área de Preview */
-.simulator-preview-area {
-    background: #e2e8f0; /* Fundo escuro para destacar o papel branco */
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    height: calc(100vh - 120px); /* Altura fixa para permitir scroll no papel */
+/* Ajuste do item da categoria para alinhar a seta à esquerda */
+.sub-trigger {
     display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    position: sticky;
-    top: 90px;
-}
-
-.preview-header {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    gap: 8px;
+    justify-content: flex-start !important;
 }
-
-.paper-container {
-    flex: 1;
-    overflow: auto; 
-    display: grid;            /* Mudança para Grid */
-    justify-items: center;    /* Centraliza horizontalmente */
-    align-items: start;       /* Começa do topo */
-    padding: 20px;
-    background-color: #e2e8f0; /* Fundo cinza para contraste */
-}
-
-/* O Papel Físico */
-.simulated-paper {
-    background: white;
-    box-shadow: 0 0 20px rgba(0,0,0,0.15);
-    position: relative;
-    transform-origin: top center;
-    transition: width 0.3s, height 0.3s;
-    /* NOVAS PROPRIEDADES: */
-    margin-bottom: 20px; 
-    flex-shrink: 0; 
-}
-
-/* Container interno das etiquetas para aplicar padding/margem da pagina */
-.labels-grid {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    /* O JS vai controlar o display/layout */
-}
-
-/* A Etiqueta Individual */
-.sim-label {
-    position: absolute; /* Posicionamento absoluto calculado */
-    border: 1px dashed #cbd5e1; /* Borda tracejada para visualização */
-    background: rgba(79, 70, 229, 0.03); /* Leve azul */
-    overflow: hidden;
-    box-sizing: border-box;
-    font-family: 'Courier New', monospace; /* Fonte mono para simular impressora termica */
-    color: #000;
-}
-
-/* Elementos dentro da etiqueta */
-.sim-element {
-    position: absolute;
-    width: 100%;
-    text-align: center;
-    white-space: nowrap;
-    line-height: 1;
-}
-
-.sim-barcode-img {
-    position: absolute;
-    /* Removemos left e transform para deixar o JS controlar a posição */
-    object-fit: fill; 
-    display: block;
-}
-
-
-/* Responsividade */
-@media (max-width: 1024px) {
-    .simulator-wrapper {
-        grid-template-columns: 1fr;
-    }
-    .simulator-preview-area {
-        position: static;
-        height: 600px;
-    }
-}
-
