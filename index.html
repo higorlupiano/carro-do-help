@@ -5,19 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Support Tools - Ferramentas Fiscais</title>
-
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-
-    <!-- Unified Navigation Bar -->
     <header class="main-header">
         <div class="container nav-container">
             <a href="index.html" class="logo">
@@ -36,24 +31,18 @@
                 ☰
             </button>
 
-            <nav class="nav-links">
-                <a href="index.html" class="nav-link cardhover">Início</a>
-                <a href="mapa_nfce_consulta.html" class="nav-link cardhover">Consulta NFC-e por Estado</a>
-                <a href="analise_xml.html" class="nav-link cardhover">Análise de XML</a>
-                <a href="xml_cleaner.html" class="nav-link cardhover">Limpar XML</a>
-				<a href="simulador_etiquetas.html" class="nav-link cardhover">Simulador Etiquetas</a>
-            </nav>
+            <nav class="nav-links" id="main-navigation">
+				</nav>
         </div>
     </header>
 
     <main>
-        <!-- Hero Section -->
         <section class="hero-section">
             <div class="container">
                 <h1 class="hero-title">Central de Ferramentas de Suporte</h1>
                 <p class="hero-subtitle">
                     Simplifique suas rotinas de suporte.
-					Analise, limpe e consulte documentos com agilidade.
+                    Analise, limpe e consulte documentos com agilidade.
                 </p>
                 <div class="flex-center gap-4">
                     <a href="xml_cleaner.html" class="btn btn-primary">Limpar XML</a>
@@ -62,11 +51,9 @@
             </div>
         </section>
 
-        <!-- Cards Section -->
         <section class="container" style="padding-top: 40px; padding-bottom: 60px;">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
 
-                <!-- Card 1: Consulta -->
                 <a href="mapa_nfce_consulta.html" class="card cardhover" style="text-decoration: none; color: inherit;">
                     <h3 class="card-title">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -83,7 +70,6 @@
                         &rarr;</span>
                 </a>
 
-                <!-- Card 2: Análise -->
                 <a href="analise_xml.html" class="card cardhover" style="text-decoration: none; color: inherit;">
                     <h3 class="card-title">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -98,7 +84,6 @@
                         &rarr;</span>
                 </a>
 
-                <!-- Card 3: Limpeza -->
                 <a href="xml_cleaner.html" class="card cardhover" style="text-decoration: none; color: inherit;">
                     <h3 class="card-title">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -116,16 +101,15 @@
                     <span style="color: var(--accent-color); font-weight: 600; font-size: 0.9rem;">Limpar Agora
                         &rarr;</span>
                 </a>
-				
-				 <!-- Card 4: Etiquetas -->
+
                 <a href="simulador_etiquetas.html" class="card cardhover" style="text-decoration: none; color: inherit;">
                     <h3 class="card-title">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                             stroke="#555555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="4" width="1" height="16"/>
-							<rect x="8" y="4" width="1" height="16"/>
-							<rect x="14" y="4" width="1" height="16"/>
-							<rect x="20" y="4" width="1" height="16"/>
+                            <rect x="2" y="4" width="1" height="16" />
+                            <rect x="8" y="4" width="1" height="16" />
+                            <rect x="14" y="4" width="1" height="16" />
+                            <rect x="20" y="4" width="1" height="16" />
                         </svg>
                         Simulador de Etiquetas
                     </h3>
@@ -142,8 +126,3 @@
 </body>
 
 </html>
-
-
-
-
-
