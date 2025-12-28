@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Etiquetas - Carro do Help</title>
+    <link rel="stylesheet" href="styles.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    </head>
+<body>
+
+    <header class="main-header">
+        <div class="container nav-container">
+             <a href="index.html" class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Support Tools
+            </a>
+			
+            <button class="mobile-toggle" aria-label="Abrir Menu">☰</button>
+			
+            <nav class="nav-links" id="main-navigation">
+				</nav>
+        </div>
+    </header>
+
+    <main class="container mt-4 mb-4">
+        
+        <div class="header-section mb-4">
+            <h2>Simulador de Etiquetas</h2>
+            <p>Ajuste as dimensões e visualize o layout da impressão em tempo real.</p>
+        </div>
+        <div class="simulator-wrapper">
+            
+            <div class="simulator-controls">
+                
+                <div class="card cardhover mb-2">
+                    <h4 class="card-title">Configurações da Página</h4>
+                    <div class="form-group">
+						<label class="form-label">Tamanho do Papel</label>
+						<div style="display: flex; gap: 15px;">
+							<label style="cursor: pointer;">
+								<input type="radio" name="paperSize" value="a4" checked onchange="updatePaper()"> A4
+							</label>
+							<label style="cursor: pointer;">
+								<input type="radio" name="paperSize" value="letter" onchange="updatePaper()"> Carta
+							</label>
+							<label style="cursor: pointer;">
+								<input type="radio" name="paperSize" value="custom" onchange="updatePaper()"> Personalizar
+							</label>
+						</div>
+					</div>
+                    <div class="row-2-col">
+                        <div class="form-group">
+                            <label class="form-label">Altura (mm)</label>
+                            <input type="number" id="pageHeight" class="form-input" value="297" oninput="updatePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Largura (mm)</label>
+                            <input type="number" id="pageWidth" class="form-input" value="210" oninput="updatePreview()">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Margens da Página (mm)</label>
+                        <div class="row-2-col">
+                            <div>
+                                <small>Superior</small>
+                                <input type="number" id="marginTop" class="form-input" value="12.70" oninput="updatePreview()">
+                            </div>
+                            <div>
+                                <small>Esquerda</small>
+                                <input type="number" id="marginLeft" class="form-input" value="4.80" oninput="updatePreview()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card cardhover mb-2">
+                    <h4 class="card-title">Configurações da Etiqueta</h4>
+                    <div class="row-2-col">
+                        <div class="form-group">
+                            <label class="form-label">Linhas</label>
+                            <input type="number" id="rows" class="form-input" value="10" oninput="updatePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Colunas</label>
+                            <input type="number" id="cols" class="form-input" value="3" oninput="updatePreview()">
+                        </div>
+                    </div>
+                    <div class="row-2-col">
+                        <div class="form-group">
+                            <label class="form-label">Altura (mm)</label>
+                            <input type="number" id="labelHeight" class="form-input" value="25.00" oninput="updatePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Largura (mm)</label>
+                            <input type="number" id="labelWidth" class="form-input" value="66.00" oninput="updatePreview()">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Espaçamento Horizontal (mm)</label>
+                        <input type="number" id="labelGapX" class="form-input" value="3.00" oninput="updatePreview()">
+                    </div>
+                </div>
+
+                <div class="card cardhover mb-2">
+                    <h4 class="card-title">
+                        <input type="checkbox" id="showBarcode" checked onchange="updatePreview()"> 
+                        Mostrar Código de Barras
+                    </h4>
+                    <div class="form-group">
+                        <label class="form-label">Distância do Topo (mm)</label>
+                        <input type="number" id="barcodeTop" class="form-input" value="1.00" oninput="updatePreview()">
+                    </div>
+                    <div class="row-2-col">
+                        <div class="form-group">
+                            <label class="form-label">Altura (mm)</label>
+                            <input type="number" id="barcodeHeight" class="form-input" value="9.00" oninput="updatePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Largura (mm)</label>
+                            <input type="number" id="barcodeWidth" class="form-input" value="33.00" oninput="updatePreview()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card cardhover mb-2">
+                    <h4 class="card-title">Textos da Etiqueta</h4>
+                    <table class="config-table">
+                        <thead>
+                            <tr>
+                                <th>Mostrar</th>
+                                <th>Texto</th>
+                                <th>Topo (mm)</th>
+                                <th>Fonte</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center"><input type="checkbox" id="showCode" checked onchange="updatePreview()"></td>
+                                <td>Código Numérico</td>
+                                <td><input type="number" id="codeTop" class="input-sm" value="10" oninput="updatePreview()"></td>
+                                <td><input type="number" id="codeSize" class="input-sm" value="8" oninput="updatePreview()"></td>
+                            </tr>
+                            <tr>
+                                <td class="text-center"><input type="checkbox" id="showDesc" checked onchange="updatePreview()"></td>
+                                <td>Descrição</td>
+                                <td><input type="number" id="descTop" class="input-sm" value="13" oninput="updatePreview()"></td>
+                                <td><input type="number" id="descSize" class="input-sm" value="10" oninput="updatePreview()"></td>
+                            </tr>
+                            <tr>
+                                <td class="text-center"><input type="checkbox" id="showPrice" checked onchange="updatePreview()"></td>
+                                <td>Valor de Venda</td>
+                                <td><input type="number" id="priceTop" class="input-sm" value="18" oninput="updatePreview()"></td>
+                                <td><input type="number" id="priceSize" class="input-sm" value="12" oninput="updatePreview()"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div> <div class="simulator-preview-area">
+                <div class="preview-header">
+                    <h3>Pré-Visualização</h3>
+                    <div class="preview-actions">
+                    <button class="btn btn-primary btn-sm" onclick="generatePDF()">Gerar PDF</button>
+                    </div>
+                </div>
+                <div class="paper-container">
+                    <div id="simulatedPaper" class="simulated-paper">
+                        <div id="labelsContainer" class="labels-grid">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="simulator.js"></script>
+	<script src="script.js"></script>
+</body>
+
+</html>
+
+
+
+

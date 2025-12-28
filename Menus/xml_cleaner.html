@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpar XML - Support Tools</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- Unified Navigation Bar -->
+    <header class="main-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Support Tools
+            </a>
+
+            <button class="mobile-toggle" aria-label="Abrir Menu">☰</button>
+
+            <nav class="nav-links" id="main-navigation">
+				</nav>
+        </div>
+    </header>
+
+    <main class="container flex-center" style="min-height: calc(100vh - 80px); padding-bottom: 40px;">
+
+        <div class="card" style="width: 100%; max-width: 600px; margin-top: 2rem;">
+            <h2 class="text-center">Limpeza de XML</h2>
+            <p class="text-center">Remova tags indesejadas e formate seu XML.</p>
+
+            <div class="form-group mt-4">
+                <label for="xmlFile" class="form-label">Arquivo XML Original:</label>
+                <input type="file" id="xmlFile" accept=".xml">
+            </div>
+
+			<div class="form-group">
+				<label for="extraTags" class="form-label" style="display: flex; align-items: center;">
+					Tags Adicionais para Remover (opcional):
+
+					<span class="info-icon svg-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+							<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+						</svg>
+
+						<span class="tooltip-text">
+							Tags padrão já incluídas: IBSCBS, vItem, infAdProd, IBSCBSTot, vNFTot, dPrevEntrega, cMunFGIBS
+						</span>
+					</span>
+					</label>
+				<input type="text" id="extraTags" class="form-input" placeholder="Ex: dPrevEntrega, obs, info...">
+				<small style="color: var(--text-muted); display: block; margin-top: 5px;">
+					Separe as tags por vírgula.
+				</small>
+			</div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                <button class="btn btn-primary" onclick="processXML()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Processar
+                </button>
+                <button class="btn btn-secondary" onclick="exportXML()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Exportar Corrigido
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label for="output" class="form-label">Pré-visualização:</label>
+                <textarea id="output" class="form-textarea" placeholder="O resultado aparecerá aqui..." readonly
+                    style="height: 200px;"></textarea>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        let originalFileName = '';
+
+        function processXML() {
+            const fileInput = document.getElementById('xmlFile');
+            const outputField = document.getElementById('output');
+
+            if (!fileInput.files.length) {
+                alert('Selecione um arquivo XML primeiro.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            originalFileName = file.name.replace(/\.xml$/i, '');
+
+            // --- LÓGICA DAS TAGS PARA REMOÇÃO ---
+            const defaultTags = [
+                'IBSCBS', 'vItem', 'infAdProd', 'IBSCBSTot', 'vNFTot', 'dPrevEntrega', 'cMunFGIBS'
+            ];
+
+            const extraTagsInput = document.getElementById('extraTags').value;
+            let extraTags = [];
+
+            if (extraTagsInput) {
+                extraTags = extraTagsInput
+                    .split(',')
+                    .map(tag => tag.trim())
+                    .filter(tag => tag.length > 0);
+            }
+
+            const tagsToRemove = [...defaultTags, ...extraTags];
+            // -----------------------------------------
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                let xmlText = e.target.result;
+
+                // 1. FASE DE SUBSTITUIÇÃO (Troca <tPag>X</tPag> por <tPag>99</tPag>)
+                const regexTPag = new RegExp(`(<tPag>)([\\s\\S]*?)(<\/tPag>)`, 'gi');
+                xmlText = xmlText.replace(regexTPag, '<tPag>99</tPag>');
+
+                // FASE DE LIMPEZA
+                // Remove declarações XML/DOCTYPE iniciais para evitar duplicação ou erros
+                xmlText = xmlText.replace(/<\?xml[^>]*\?>/gi, '').trim();
+
+                tagsToRemove.forEach(tag => {
+                    // Remove a tag e seu conteúdo
+                    let regexSafe = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'gi');
+                    xmlText = xmlText.replace(regexSafe, '');
+
+                    // Remove tags vazias ou self-closing que possam ter sobrado
+                    let regexEmpty = new RegExp(`<${tag}[^>]*>\\s*<\\/${tag}>`, 'gi');
+                    xmlText = xmlText.replace(regexEmpty, '');
+                });
+
+                // Opcional: Remover quebras de linha múltiplas
+                xmlText = xmlText.replace(/(\r\n|\n|\r){2,}/gm, '\n');
+
+                outputField.value = xmlText.trim();
+                outputField.scrollTop = 0; // Scroll to top
+            };
+
+            reader.readAsText(file);
+        }
+
+        function exportXML() {
+            const content = document.getElementById('output').value;
+
+            if (!content) {
+                alert('Nenhum XML processado para exportar.');
+                return;
+            }
+
+            const fileName = originalFileName + '_corrigido.xml';
+            // Adiciona o cabeçalho padrão XML
+            const finalContent = `<?xml version="1.0" encoding="UTF-8"?>\n${content}`;
+
+            const blob = new Blob([finalContent], { type: 'text/xml;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+
+</html>
+
+
+
+
