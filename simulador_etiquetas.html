@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulador de Etiquetas - Carro do Help</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     </head>
@@ -12,7 +14,7 @@
 
     <header class="main-header">
         <div class="container nav-container">
-             <a href="index.html" class="logo">
+            <a href="index.html" class="logo">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -23,14 +25,11 @@
                 </svg>
                 Support Tools
             </a>
-
-            <nav class="nav-links">
-                <a href="index.html" class="nav-link cardhover">Início</a>
-                <a href="mapa_nfce_consulta.html" class="nav-link cardhover">Consulta NFC-e por Estado</a>
-                <a href="analise_xml.html" class="nav-link cardhover">Análise de XML</a>
-                <a href="xml_cleaner.html" class="nav-link cardhover">Limpar XML</a>
-				<a href="simulador_etiquetas.html" class="nav-link cardhover">Simulador Etiquetas</a>
-            </nav>
+			
+            <button class="mobile-toggle" aria-label="Abrir Menu">☰</button>
+			
+            <nav class="nav-links" id="main-navigation">
+				</nav>
         </div>
     </header>
 
