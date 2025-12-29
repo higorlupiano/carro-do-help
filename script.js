@@ -27,13 +27,6 @@ const menuConfig = [
                     { label: 'Consulta CNPJ', href: 'https://solucoes.receita.fazenda.gov.br/Servicos/cnpjreva/cnpjreva_solicitacao.asp' },
                     { label: 'Sintegra', href: 'http://www.sintegra.gov.br/' }
                 ]
-            },
-            {
-                category: 'Consultas Fiscais',
-                links: [
-                    { label: 'Consulta CPF', href: 'https://consultacpf.receita.fazenda.gov.br/' },
-                    { label: 'Consulta CNPJ', href: 'https://solucoes.receita.fazenda.gov.br/Servicos/cnpjreva/cnpjreva_solicitacao.asp' }
-                ]
             }
         ],
         // LINKS DIRETOS (Aparecem logo no primeiro nível do dropdown)
@@ -103,3 +96,4 @@ function initMobileMenu() {
         toggleBtn.onclick = () => navLinks.classList.toggle('active');
     }
 }
+
