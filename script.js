@@ -23,8 +23,8 @@ const menuConfig = [
             {
                 category: 'Consultas',
                 links: [
-                    { label: 'Consulta NF-e', href: 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx' },
-                    { label: 'Consulta CNPJ', href: 'https://solucoes.receita.fazenda.gov.br/Servicos/cnpjreva/cnpjreva_solicitacao.asp' },
+                    { label: 'Consultar NF-e', href: 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx' },
+                    { label: 'Consultar CNPJ', href: 'https://solucoes.receita.fazenda.gov.br/Servicos/cnpjreva/cnpjreva_solicitacao.asp' },
                     { label: 'Sintegra', href: 'http://www.sintegra.gov.br/' }
                 ]
             }
@@ -32,9 +32,10 @@ const menuConfig = [
         // LINKS DIRETOS (Aparecem logo no primeiro nível do dropdown)
         directLinks: [
             { label: 'Tabela CEST', href: 'https://www.codigocest.com.br/' },
-            { label: 'Consulta NCM', href: 'https://portalunico.siscomex.gov.br/classif/#/sumario?perfil=publico' },
+            { label: 'Consultar NCM', href: 'https://portalunico.siscomex.gov.br/classif/#/sumario?perfil=publico' },
             { label: 'Monitor Sefaz', href: 'https://monitor.tecnospeed.com.br/?&filter-type-chart=bar' },
-            { label: 'Portal Nacional NF-e', href: 'https://www.nfe.fazenda.gov.br/' }
+            { label: 'Portal Nacional NF-e', href: 'https://www.nfe.fazenda.gov.br/' },
+            { label: 'Cidade Homologada NFS-e', href: 'https://tecnospeed.com.br/plugdfe/nfse/#localizacaoNomeCidade' }
         ]
     }
 ];
@@ -96,4 +97,5 @@ function initMobileMenu() {
         toggleBtn.onclick = () => navLinks.classList.toggle('active');
     }
 }
+
 
