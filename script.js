@@ -35,6 +35,7 @@ const menuConfig = [
             { label: 'Consultar NCM', href: 'https://portalunico.siscomex.gov.br/classif/#/sumario?perfil=publico' },
             { label: 'Monitor Sefaz', href: 'https://monitor.tecnospeed.com.br/?&filter-type-chart=bar' },
             { label: 'Portal Nacional NF-e', href: 'https://www.nfe.fazenda.gov.br/' },
+            { label: 'Lista de Serviços', href: 'https://www.gov.br/nfse/pt-br/mei-e-demais-empresas/codigos-de-tributacao-nacional-nbs' },
             { label: 'Cidade Homologada NFS-e', href: 'https://tecnospeed.com.br/plugdfe/nfse/#localizacaoNomeCidade' }
         ]
     }
@@ -97,5 +98,6 @@ function initMobileMenu() {
         toggleBtn.onclick = () => navLinks.classList.toggle('active');
     }
 }
+
 
 
