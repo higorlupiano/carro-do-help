@@ -162,18 +162,30 @@
         }
 
         function cleanXML(xmlText, tagsToRemove) {
-            let cleaned = xmlText.replace(/<tPag>[\s\S]*?<\/tPag>/gi, '<tPag>99</tPag>');
-            cleaned = cleaned.replace(/<\?xml[^>]*\?>/gi, '').trim();
+    // 1. Substitui tPag por 99
+    let cleaned = xmlText.replace(/<tPag>[\s\S]*?<\/tPag>/gi, '<tPag>99</tPag>');
+    
+    // 2. Remove declarações XML iniciais
+    cleaned = cleaned.replace(/<\?xml[^>]*\?>/gi, '').trim();
 
-            tagsToRemove.forEach(tag => {
-                let regexSafe = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'gi');
-                cleaned = cleaned.replace(regexSafe, '');
-                let regexEmpty = new RegExp(`<${tag}[^>]*>\\s*<\\/${tag}>`, 'gi');
-                cleaned = cleaned.replace(regexEmpty, '');
-            });
+    // 3. Remove as tags e seus conteúdos
+    tagsToRemove.forEach(tag => {
+        // Remove a tag e tudo entre ela, incluindo a própria linha
+        let regexSafe = new RegExp(`\\s*<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'gi');
+        cleaned = cleaned.replace(regexSafe, '');
+        
+        // Remove tags self-closing ou vazias que restarem
+        let regexEmpty = new RegExp(`\\s*<${tag}[^>]*/>|\\s*<${tag}[^>]*>\\s*<\\/${tag}>`, 'gi');
+        cleaned = cleaned.replace(regexEmpty, '');
+    });
 
-            return cleaned.replace(/(\r\n|\n|\r){2,}/gm, '\n').trim();
-        }
+    // 4. Remove linhas em branco extras e espaços residuais
+    // O primeiro replace remove linhas que contenham apenas espaços ou tabs
+    // O segundo substitui 3 ou mais quebras de linha por apenas uma
+    cleaned = cleaned.replace(/^\s*[\r\n]/gm, ''); 
+    
+    return cleaned.trim();
+}
 
         async function exportProcessedFiles() {
             if (processedFiles.length === 0) {
@@ -201,3 +213,4 @@
     </script>
 </body>
 </html>
+
