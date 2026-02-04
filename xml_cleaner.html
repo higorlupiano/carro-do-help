@@ -8,96 +8,164 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        /* Adicionando um estilo básico para o feedback de múltiplos arquivos */
-        .file-list-status { font-size: 0.85rem; color: var(--text-muted); margin-top: 5px; }
+        /* Estilos adicionais para a barra de progresso integrados ao sistema de cores original */
+        .progress-container {
+            width: 100%;
+            background-color: var(--border-color);
+            border-radius: var(--radius-full);
+            margin: 1.5rem 0;
+            display: none;
+            overflow: hidden;
+            height: 10px;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            transition: width 0.3s ease;
+        }
+        
+        .status-badge {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
     </style>
 </head>
 
 <body>
+    <header class="main-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Support Tools
+            </a>
+            <button class="mobile-toggle" aria-label="Abrir Menu">☰</button>
+            <nav class="nav-links" id="main-navigation"></nav>
+        </div>
+    </header>
+
     <main class="container flex-center">
         <div class="card" style="width: 100%; max-width: 600px; margin-top: 2rem;">
             <h2 class="text-center">Limpeza de XML em Lote</h2>
-            <p class="text-center">Selecione um ou mais arquivos para processar.</p>
+            <p class="text-center">Selecione vários arquivos e exporte tudo em um clique.</p>
 
             <div class="form-group mt-4">
                 <label for="xmlFile" class="form-label">Arquivos XML Originais:</label>
                 <input type="file" id="xmlFile" accept=".xml" multiple>
-                <div id="fileStatus" class="file-list-status"></div>
             </div>
 
             <div class="form-group">
                 <label for="extraTags" class="form-label" style="display: flex; align-items: center;">
                     Tags Adicionais para Remover (opcional):
+                    <span class="info-icon svg-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        </svg>
+                        <span class="tooltip-text">
+                            Padrão: IBSCBS, vItem, infAdProd, IBSCBSTot, vNFTot, dPrevEntrega, cMunFGIBS, tpCredPresIBSZFM, infProdNFF, infSolicNFF, IS, gCred, indBemMovelUsado
+                        </span>
+                    </span>
                 </label>
                 <input type="text" id="extraTags" class="form-input" placeholder="Ex: dPrevEntrega, obs...">
+                <small style="color: var(--text-muted); display: block; margin-top: 5px;">Separe por vírgula.</small>
+            </div>
+
+            <div id="progressArea" style="display: none;">
+                <span id="statusLabel" class="status-badge">Processando: 0%</span>
+                <div class="progress-container" id="progressContainer" style="display: block;">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
                 <button class="btn btn-primary" onclick="processAllXMLs()">
-                    Processar Todos
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    Processar
                 </button>
                 <button class="btn btn-secondary" onclick="exportProcessedFiles()">
-                    Exportar Tudo (.zip)
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Exportar (.zip)
                 </button>
             </div>
 
             <div class="form-group">
-                <label for="output" class="form-label">Log de Processamento / Pré-visualização:</label>
-                <textarea id="output" class="form-textarea" placeholder="O status do processamento aparecerá aqui..." readonly style="height: 200px;"></textarea>
+                <label for="output" class="form-label">Log de Processamento:</label>
+                <textarea id="output" class="form-textarea" placeholder="O resultado aparecerá aqui..." readonly style="height: 180px;"></textarea>
             </div>
         </div>
     </main>
 
+    <script src="script.js"></script>
     <script>
-        // Objeto para armazenar os arquivos processados temporariamente
         let processedFiles = [];
 
         async function processAllXMLs() {
             const fileInput = document.getElementById('xmlFile');
             const outputField = document.getElementById('output');
+            const progBar = document.getElementById('progressBar');
+            const statusLabel = document.getElementById('statusLabel');
+            const progressArea = document.getElementById('progressArea');
             
             if (!fileInput.files.length) {
                 alert('Selecione ao menos um arquivo XML.');
                 return;
             }
 
-            processedFiles = []; // Limpa cache anterior
-            outputField.value = "Iniciando processamento...\n";
+            processedFiles = [];
+            outputField.value = "--- Iniciando Processamento em Lote ---\n";
+            progressArea.style.display = 'block';
+            progBar.style.width = '0%';
 
-            // Tags padrão
             const defaultTags = ['IBSCBS', 'vItem', 'infAdProd', 'IBSCBSTot', 'vNFTot', 'dPrevEntrega', 'cMunFGIBS', 'tpCredPresIBSZFM', 'infProdNFF', 'infSolicNFF', 'IS', 'gCred', 'indBemMovelUsado'];
             const extraTagsInput = document.getElementById('extraTags').value;
             const extraTags = extraTagsInput ? extraTagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : [];
             const tagsToRemove = [...defaultTags, ...extraTags];
 
-            // Itera sobre cada arquivo selecionado
-            for (let file of fileInput.files) {
-                const text = await file.text();
-                const cleanedText = cleanXML(text, tagsToRemove);
-                
-                processedFiles.push({
-                    name: file.name.replace(/\.xml$/i, '') + '_corrigido.xml',
-                    content: `<?xml version="1.0" encoding="UTF-8"?>\n${cleanedText}`
-                });
+            const totalFiles = fileInput.files.length;
 
-                outputField.value += `✓ ${file.name} processado.\n`;
+            for (let i = 0; i < totalFiles; i++) {
+                const file = fileInput.files[i];
+                try {
+                    const text = await file.text();
+                    const cleanedText = cleanXML(text, tagsToRemove);
+                    
+                    processedFiles.push({
+                        name: file.name.replace(/\.xml$/i, '') + '_corrigido.xml',
+                        content: `<?xml version="1.0" encoding="UTF-8"?>\n${cleanedText}`
+                    });
+
+                    const percent = Math.round(((i + 1) / totalFiles) * 100);
+                    progBar.style.width = percent + '%';
+                    statusLabel.innerText = `Processando: ${percent}%`;
+                    outputField.value += `✓ ${file.name} OK.\n`;
+                    outputField.scrollTop = outputField.scrollHeight;
+                } catch (err) {
+                    outputField.value += `✗ Erro em ${file.name}: ${err.message}\n`;
+                }
             }
             
-            outputField.value += `\nTotal: ${processedFiles.length} arquivos prontos para exportação.`;
+            outputField.value += `\n--- Concluído: ${processedFiles.length} de ${totalFiles} arquivos processados. ---`;
         }
 
         function cleanXML(xmlText, tagsToRemove) {
-            // Lógica de substituição de tPag
-            const regexTPag = new RegExp(`(<tPag>)([\\s\\S]*?)(<\/tPag>)`, 'gi');
-            let cleaned = xmlText.replace(regexTPag, '<tPag>99</tPag>');
-
-            // Remove declarações XML iniciais
+            let cleaned = xmlText.replace(/<tPag>[\s\S]*?<\/tPag>/gi, '<tPag>99</tPag>');
             cleaned = cleaned.replace(/<\?xml[^>]*\?>/gi, '').trim();
 
             tagsToRemove.forEach(tag => {
-                // Remove tags com conteúdo e self-closing
                 let regexSafe = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'gi');
                 cleaned = cleaned.replace(regexSafe, '');
                 let regexEmpty = new RegExp(`<${tag}[^>]*>\\s*<\\/${tag}>`, 'gi');
@@ -114,27 +182,21 @@
             }
 
             if (processedFiles.length === 1) {
-                // Download direto se for apenas um arquivo
-                const file = processedFiles[0];
-                downloadFile(file.content, file.name, 'text/xml');
+                const f = processedFiles[0];
+                const blob = new Blob([f.content], { type: 'text/xml;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = f.name;
+                link.click();
             } else {
-                // Cria um ZIP se houver múltiplos
                 const zip = new JSZip();
-                processedFiles.forEach(file => {
-                    zip.file(file.name, file.content);
-                });
-
+                processedFiles.forEach(f => zip.file(f.name, f.content));
                 const content = await zip.generateAsync({ type: "blob" });
-                downloadFile(content, "xml_processados_lote.zip", "application/zip");
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = "xml_corrigidos_lote.zip";
+                link.click();
             }
-        }
-
-        function downloadFile(content, fileName, contentType) {
-            const blob = content instanceof Blob ? content : new Blob([content], { type: contentType });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = fileName;
-            link.click();
         }
     </script>
 </body>
