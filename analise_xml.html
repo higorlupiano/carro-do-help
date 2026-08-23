@@ -497,10 +497,8 @@
             trs.forEach(tr => {
                 const tds = Array.from(tr.querySelectorAll('td')).map(td => {
                     let val = td.innerText.replace(/"/g, '""').trim();
-                    // Força o Excel a tratar códigos puramente numéricos como texto para não perder zeros à esquerda
-                    if (/^\d+$/.test(val)) {
-                        return `="${val}"`;
-                    }
+                    // Valores exportados de forma natural, sem fórmulas do Excel
+                    // O ERP ou Sistema que importar tratará como texto puramente.
                     return `"${val}"`;
                 });
                 if (tds.length > 1) csvRows.push(tds.join(',')); // Ignoring empty states
