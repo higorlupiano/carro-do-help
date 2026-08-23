@@ -171,12 +171,12 @@
         const formatCurrency = (val) => {
             const num = parseFloat(val);
             if (isNaN(num)) return 'R$ 0,00';
-            return `R$ ${num.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(num);
         };
         const formatQtd = (val) => {
             const num = parseFloat(val);
-            if (isNaN(num)) return '0';
-            return num.toFixed(4).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            if (isNaN(num)) return '0,0000';
+            return new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).format(num);
         };
         const getVal = (node, tag) => {
             if (!node) return '';
