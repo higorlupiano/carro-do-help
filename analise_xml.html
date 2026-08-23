@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de XML - Support Tools</title>
+    <meta name="description"
+        content="Carregue e analise arquivos XML de NF-e com suporte a drag & drop, tabelas em tempo real, CSV e PDF.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Incluindo jsPDF e autoTable via CDN local ou estática -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+
+<body>
+    <!-- Barra de Navegação -->
+    <header class="main-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Support Tools
+            </a>
+            <button class="mobile-toggle" aria-label="Abrir Menu">☰</button>
+            <nav class="nav-links" id="main-navigation"></nav>
+        </div>
+    </header>
+
+    <main class="container page-wrapper">
+        <div class="analysis-container">
+
+            <!-- Conteúdo Principal (Esquerda) -->
+            <div class="analysis-results card" style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="page-title-section">
+                    <h2>Análise Inteligente de XML</h2>
+                    <p>Arraste arquivos ou clique no histórico para visualizar dados validados instantaneamente.</p>
+                </div>
+
+                <!-- Resumo Rápido (KPIs) - Oculto por padrão -->
+                <div class="kpi-grid" id="kpiGrid" style="display:none;">
+                    <div class="kpi-card">
+                        <h4>Emitente</h4>
+                        <span id="kpiEmit"></span>
+                    </div>
+                    <div class="kpi-card">
+                        <h4>Destinatário</h4>
+                        <span id="kpiDest"></span>
+                    </div>
+                    <div class="kpi-card">
+                        <h4>Itens / Natureza</h4>
+                        <span id="kpiItems"></span>
+                    </div>
+                    <div class="kpi-card">
+                        <h4>Valor Total</h4>
+                        <span id="kpiTotal" style="color:var(--primary-color);"></span>
+                    </div>
+                </div>
+
+                <!-- Drag & Drop Zone -->
+                <div class="xml-dropzone" id="dropzone">
+                    <input type="file" id="xmlFile" accept=".xml" style="display:none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                        stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <path d="M12 18v-6"></path>
+                        <path d="M9 15l3-3 3 3"></path>
+                    </svg>
+                    <p style="margin:0; font-size:1.1rem;">Arraste e solte o XML aqui ou <strong>clique para
+                            selecionar</strong></p>
+                </div>
+
+                <!-- Barra de Ferramentas (Busca e Export) -->
+                <div class="toolbar" id="toolbar"
+                    style="display:none; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <input type="text" id="searchInput" class="form-input"
+                        placeholder="🔍 Buscar nos resultados (ex: NCM, Descrição)..." style="max-width:350px;">
+
+                    <div class="flex-buttons" style="margin-bottom:0;">
+                        <button class="btn btn-secondary btn-sm" id="exportCsvBtn">📥 CSV</button>
+                        <button class="btn btn-secondary btn-sm" id="exportPdfBtn">📄 PDF</button>
+                        <button class="btn btn-secondary btn-sm" id="exportTxtBtn">📝 TXT</button>
+                    </div>
+                </div>
+
+                <!-- Tabela de Dados Exibida Dinamicamente -->
+                <div class="table-responsive" id="tableContainer" style="display:none; max-height: 500px;">
+                    <table class="data-table" id="dataTable">
+                        <thead id="tableHead" style="position: sticky; top: 0; z-index: 1;"></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <!-- Sidebar (Direita) -->
+            <div class="analysis-sidebar">
+
+                <!-- Histórico -->
+                <div class="history-section" style="margin-bottom: 24px;">
+                    <h3 class="sidebar-title">Histórico Local</h3>
+                    <ul class="history-list" id="historyList">
+                        <li style="font-size:0.8rem; color:var(--text-muted);">Nenhum arquivo recente.</li>
+                    </ul>
+                    <button class="btn btn-secondary btn-sm" id="clearHistoryBtn"
+                        style="width:100%; margin-top:12px; display:none;">Limpar Histórico</button>
+                </div>
+
+                <div style="margin: 20px 0; border-top: 1px solid var(--border-color);"></div>
+
+                <!-- Visualizações -->
+                <h3 class="sidebar-title">Filtros de Visualização</h3>
+                <button class="sidebar-btn" id="btnViewGeral" disabled>📄 Detalhamento de Itens</button>
+                <button class="sidebar-btn" id="btnViewImpostos" disabled>💰 Impostos / Reforma Trib</button>
+                <button class="sidebar-btn" id="btnViewDiverg" disabled style="color: var(--accent-color);">⚠️
+                    Conferência de Unidades</button>
+                <button class="sidebar-btn" id="btnViewNcm" disabled>📦 Agrupar por NCM</button>
+                <button class="sidebar-btn" id="btnViewCfop" disabled>🔄 Agrupar por CFOP</button>
+                <button class="sidebar-btn" id="btnViewCst" disabled>📊 Agrupar por CST/CSOSN</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        /* ==========================================================================
+           LÓGICA DO ANALISADOR DE XML (NOVO FORMATO)
+           ========================================================================== */
+
+        // Elementos DOM
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('xmlFile');
+        const kpiGrid = document.getElementById('kpiGrid');
+        const toolbar = document.getElementById('toolbar');
+        const tableContainer = document.getElementById('tableContainer');
+        const tableHead = document.getElementById('tableHead');
+        const tableBody = document.getElementById('tableBody');
+        const searchInput = document.getElementById('searchInput');
+        const historyList = document.getElementById('historyList');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+        // Botões de view
+        const btnsView = {
+            'geral': document.getElementById('btnViewGeral'),
+            'impostos': document.getElementById('btnViewImpostos'),
+            'divergencia': document.getElementById('btnViewDiverg'),
+            'ncm': document.getElementById('btnViewNcm'),
+            'cfop': document.getElementById('btnViewCfop'),
+            'cst': document.getElementById('btnViewCst')
+        };
+
+        // Estado Global
+        let currentXmlData = null;
+        let currentView = 'geral';
+        let tableRowsData = []; // [{ rowData: ['col1', 'col2', ...], textForSearch: '...'} ]
+
+        // =========================================================
+        // UTILS
+        // =========================================================
+        const formatCurrency = (val) => {
+            const num = parseFloat(val);
+            if (isNaN(num)) return 'R$ 0,00';
+            return `R$ ${num.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+        };
+        const formatQtd = (val) => {
+            const num = parseFloat(val);
+            if (isNaN(num)) return '0';
+            return num.toFixed(4).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        };
+        const getVal = (node, tag) => {
+            if (!node) return '';
+            const t = node.getElementsByTagName(tag)[0];
+            return t && t.textContent ? t.textContent.trim() : '';
+        };
+
+        // =========================================================
+        // LOCAL STORAGE HISTORY
+        // =========================================================
+        const HISTORY_KEY = 'helpNfeHistory';
+        const MAX_HISTORY = 5; // Manter os últimos 5 XMLs para não estourar os 5MB do Storage
+
+        function loadHistory() {
+            const histStr = localStorage.getItem(HISTORY_KEY);
+            let hist = [];
+            if (histStr) {
+                try { hist = JSON.parse(histStr); } catch (e) { }
+            }
+            historyList.innerHTML = '';
+            if (hist.length > 0) {
+                clearHistoryBtn.style.display = 'block';
+                hist.forEach((h, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'history-item';
+                    li.innerHTML = `
+                        <span class="history-item-title">📄 ${h.fileName}</span>
+                        <span class="history-item-date">${h.date} - ${h.chaveAcesso}</span>
+                    `;
+                    li.onclick = () => {
+                        processXmlContent(h.xmlContent, h.fileName, false);
+                    };
+                    historyList.appendChild(li);
+                });
+            } else {
+                clearHistoryBtn.style.display = 'none';
+                historyList.innerHTML = '<li style="font-size:0.8rem; color:var(--text-muted);">Nenhum arquivo recente.</li>';
+            }
+        }
+
+        function saveToHistory(fileName, xmlContent, chaveAcesso) {
+            let hist = [];
+            try { hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch (e) { }
+            // Evitar duplicação da mesma chave
+            hist = hist.filter(h => h.chaveAcesso !== chaveAcesso);
+            hist.unshift({
+                fileName: fileName,
+                chaveAcesso: chaveAcesso,
+                date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                xmlContent: xmlContent
+            });
+            if (hist.length > MAX_HISTORY) hist = hist.slice(0, MAX_HISTORY);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+            loadHistory();
+        }
+
+        clearHistoryBtn.onclick = () => {
+            if (confirm("Limpar todo o histórico?")) {
+                localStorage.removeItem(HISTORY_KEY);
+                loadHistory();
+            }
+        }
+
+        // =========================================================
+        // DRAG & DROP / FILE INPUT
+        // =========================================================
+        dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+        dropzone.addEventListener('dragleave', (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); });
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) handleFileSelected(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFileSelected(e.target.files[0]);
+        });
+
+        function handleFileSelected(file) {
+            if (file.type !== "text/xml" && !file.name.toLowerCase().endsWith('.xml')) {
+                alert("Por favor, selecione um arquivo XML.");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => processXmlContent(e.target.result, file.name, true);
+            reader.readAsText(file);
+        }
+
+        // =========================================================
+        // PARSER DO XML
+        // =========================================================
+        function processXmlContent(xmlString, fileName, isNew) {
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+                if (xmlDoc.getElementsByTagName("parsererror").length > 0) throw new Error("Erro na formatação do XML.");
+
+                // Parsing Genérico
+                const infNFe = xmlDoc.getElementsByTagName('infNFe')[0];
+                const ide = xmlDoc.getElementsByTagName('ide')[0];
+                const emit = xmlDoc.getElementsByTagName('emit')[0];
+                const dest = xmlDoc.getElementsByTagName('dest')[0];
+                const ICMSTot = xmlDoc.querySelector('ICMSTot');
+                const dets = xmlDoc.querySelectorAll('infNFe > det'); // todos os itens
+
+                if (!infNFe) throw new Error("Tag <infNFe> não encontrada. O arquivo é um XML de Nota Fiscal válido?");
+
+                const chave = infNFe.getAttribute('Id') ? infNFe.getAttribute('Id').replace('NFe', '') : 'Desconhecida';
+                const nNF = ide ? getVal(ide, 'nNF') : 'S/N';
+                const natOp = ide ? getVal(ide, 'natOp') : 'N/A';
+                const vTotal = ICMSTot ? getVal(ICMSTot, 'vNF') : '0.00';
+                const emitNome = emit ? getVal(emit, 'xNome') : 'Desconhecido';
+                const destNome = dest ? getVal(dest, 'xNome') : 'Consumidor / Desconhecido';
+
+                currentXmlData = {
+                    chave: chave, nNF: nNF, natOp: natOp, vTotal: vTotal,
+                    emitNome: emitNome, destNome: destNome,
+                    itens: []
+                };
+
+                // Parsing dos Itens
+                dets.forEach(det => {
+                    const prod = det.getElementsByTagName('prod')[0];
+                    const imposto = det.getElementsByTagName('imposto')[0];
+
+                    const itemData = {
+                        pos: det.getAttribute('nItem'),
+                        cProd: getVal(prod, 'cProd'),
+                        cEAN: getVal(prod, 'cEAN'),
+                        xProd: getVal(prod, 'xProd'),
+                        NCM: getVal(prod, 'NCM'),
+                        CFOP: getVal(prod, 'CFOP'),
+                        uCom: getVal(prod, 'uCom'),
+                        qCom: getVal(prod, 'qCom'),
+                        vUnCom: getVal(prod, 'vUnCom'),
+                        vProd: getVal(prod, 'vProd'),
+                        uTrib: getVal(prod, 'uTrib'),
+                        qTrib: getVal(prod, 'qTrib'),
+                        vUnTrib: getVal(prod, 'vUnTrib'),
+
+                        // Impostos
+                        CST: 'N/A',
+                        vBC_ICMS: '0.00', vICMS: '0.00', pICMS: '0.00',
+                        vIPI: '0.00', vPIS: '0.00', vCOFINS: '0.00',
+                        vIBS: '0.00', vCBS: '0.00' // Novos impostos reforma trib
+                    };
+
+                    if (imposto) {
+                        // ICMS / CST
+                        const icms = imposto.querySelector('ICMS');
+                        if (icms) {
+                            const icmsChild = icms.children[0];
+                            if (icmsChild) {
+                                itemData.CST = getVal(icmsChild, 'CST') || getVal(icmsChild, 'CSOSN') || 'N/A';
+                                itemData.vBC_ICMS = getVal(icmsChild, 'vBC') || '0.00';
+                                itemData.vICMS = getVal(icmsChild, 'vICMS') || '0.00';
+                                itemData.pICMS = getVal(icmsChild, 'pICMS') || '0.00';
+                            }
+                        }
+                        // PIS/COFINS/IPI
+                        itemData.vIPI = getVal(imposto.querySelector('IPI'), 'vIPI') || '0.00';
+                        itemData.vPIS = getVal(imposto.querySelector('PIS'), 'vPIS') || '0.00';
+                        itemData.vCOFINS = getVal(imposto.querySelector('COFINS'), 'vCOFINS') || '0.00';
+
+                        // IBS e CBS (Reforma Tributária - Tag pode estar em desenvolvimento pela Sefaz, mas criamos fallback)
+                        itemData.vIBS = getVal(imposto.querySelector('IBS'), 'vIBS') || getVal(imposto.querySelector('IBS'), 'vIBSUFDest') || '0.00';
+                        itemData.vCBS = getVal(imposto.querySelector('CBS'), 'vCBS') || '0.00';
+                    }
+
+                    currentXmlData.itens.push(itemData);
+                });
+
+                // Salva no histórico se for novo
+                if (isNew) {
+                    saveToHistory(fileName, xmlString, currentXmlData.chave);
+                }
+
+                // UI Update
+                updateKPIs();
+                enableUI();
+                renderView('geral'); // Render padrão
+
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        // =========================================================
+        // UPDATES VISUAIS (KPIs e UI)
+        // =========================================================
+        function updateKPIs() {
+            kpiGrid.style.display = 'grid';
+            toolbar.style.display = 'flex';
+            tableContainer.style.display = 'block';
+
+            document.getElementById('kpiEmit').innerText = currentXmlData.emitNome;
+            document.getElementById('kpiDest').innerText = currentXmlData.destNome;
+            document.getElementById('kpiItems').innerText = `${currentXmlData.itens.length} itens\n(${currentXmlData.natOp})`;
+            document.getElementById('kpiTotal').innerText = formatCurrency(currentXmlData.vTotal);
+        }
+
+        function enableUI() {
+            Object.values(btnsView).forEach(btn => btn.disabled = false);
+            dropzone.style.display = 'flex';
+            dropzone.style.padding = '15px'; // Reduz a dropzone que já carregou algo
+            dropzone.querySelector('svg').style.display = 'none';
+        }
+
+        function setActiveSidebarBtn(viewName) {
+            Object.values(btnsView).forEach(b => b.classList.remove('active'));
+            if (btnsView[viewName]) btnsView[viewName].classList.add('active');
+        }
+
+        // =========================================================
+        // RENDERIZAÇÃO DE TABELAS
+        // =========================================================
+        function renderView(viewId) {
+            currentView = viewId;
+            setActiveSidebarBtn(viewId);
+            searchInput.value = ''; // Reset busca
+            let hHTML = '';
+            tableRowsData = [];
+
+            if (viewId === 'geral') {
+                hHTML = `<tr><th>Item</th><th>Código</th><th>EAN</th><th>Descrição</th><th>NCM</th><th>CFOP</th><th>Qtd</th><th>Vlr Unit</th><th>Vlr Total</th></tr>`;
+                currentXmlData.itens.forEach(i => {
+                    const raw = [i.pos, i.cProd, i.cEAN || '-', i.xProd, i.NCM, i.CFOP, formatQtd(i.qCom), formatCurrency(i.vUnCom), formatCurrency(i.vProd)];
+                    tableRowsData.push({ rowData: raw, searchStr: raw.join(' ').toLowerCase() });
+                });
+            }
+            else if (viewId === 'impostos') {
+                hHTML = `<tr><th>Item</th><th>Descrição</th><th>CST/CSOSN</th><th>vBC ICMS</th><th>vICMS</th><th>vIPI</th><th>vPIS</th><th>vCOFINS</th><th>vIBS</th><th>vCBS</th></tr>`;
+                currentXmlData.itens.forEach(i => {
+                    const raw = [i.pos, i.xProd, i.CST, formatCurrency(i.vBC_ICMS), formatCurrency(i.vICMS), formatCurrency(i.vIPI), formatCurrency(i.vPIS), formatCurrency(i.vCOFINS), formatCurrency(i.vIBS), formatCurrency(i.vCBS)];
+                    tableRowsData.push({ rowData: raw, searchStr: raw.join(' ').toLowerCase() });
+                });
+            }
+            else if (viewId === 'ncm' || viewId === 'cfop' || viewId === 'cst') {
+                const groupKey = viewId === 'ncm' ? 'NCM' : viewId === 'cfop' ? 'CFOP' : 'CST';
+                hHTML = `<tr><th>${groupKey.toUpperCase()}</th><th>Itens Pertencentes (Qtde)</th><th>Somatório (Valor Produto)</th></tr>`;
+                const groups = {};
+                currentXmlData.itens.forEach(i => {
+                    const k = i[groupKey] || 'N/A';
+                    if (!groups[k]) groups[k] = { count: 0, val: 0, descStr: [] };
+                    groups[k].count++;
+                    groups[k].val += parseFloat(i.vProd) || 0;
+                    groups[k].descStr.push(i.xProd);
+                });
+                for (const g in groups) {
+                    const raw = [g, groups[g].count, formatCurrency(groups[g].val)];
+                    tableRowsData.push({ rowData: raw, searchStr: (raw.join(' ') + ' ' + groups[g].descStr.join(' ')).toLowerCase() });
+                }
+            }
+            else if (viewId === 'divergencia') {
+                hHTML = `<tr><th>Item</th><th>Descrição</th><th>Unid (Com/Trib)</th><th>Qtd (Com/Trib)</th><th>Divergência?</th></tr>`;
+                currentXmlData.itens.forEach(i => {
+                    const cVal = parseFloat(i.qCom) * parseFloat(i.vUnCom);
+                    const tVal = parseFloat(i.qTrib) * parseFloat(i.vUnTrib);
+                    const diffUn = i.uCom !== i.uTrib;
+                    const diffVal = Math.abs(cVal - tVal) > 0.01;
+                    const isDiff = diffUn || diffVal;
+
+                    if (isDiff) {
+                        const raw = [
+                            i.pos, i.xProd,
+                            `${i.uCom} / ${i.uTrib}`,
+                            `${formatQtd(i.qCom)} / ${formatQtd(i.qTrib)}`,
+                            `<span class="badge badge-danger">SIM</span> (Valores/Unidades distintos)`
+                        ];
+                        tableRowsData.push({ rowData: raw, searchStr: raw.join(' ').toLowerCase() });
+                    }
+                });
+                if (tableRowsData.length === 0) {
+                    tableRowsData.push({ rowData: ['-', 'Nenhuma divergência encontrada.', '-', '-', '<span class="badge badge-success">OK</span>'], searchStr: '' });
+                }
+            }
+
+            tableHead.innerHTML = hHTML;
+            buildTableRows('');
+        }
+
+        function buildTableRows(filterText) {
+            tableBody.innerHTML = '';
+            filterText = filterText.toLowerCase();
+            let count = 0;
+            tableRowsData.forEach(r => {
+                if (filterText === '' || r.searchStr.includes(filterText)) {
+                    count++;
+                    const tr = document.createElement('tr');
+                    r.rowData.forEach(colData => {
+                        const td = document.createElement('td');
+                        td.innerHTML = colData; // innerHTML to parse badges
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                }
+            });
+            if (count === 0) tableBody.innerHTML = '<tr><td colspan="15" style="text-align:center;">Nenhum resultado para a busca.</td></tr>';
+        }
+
+        // =========================================================
+        // EVENTOS GERAIS
+        // =========================================================
+        searchInput.addEventListener('input', (e) => buildTableRows(e.target.value));
+
+        Object.keys(btnsView).forEach(k => {
+            btnsView[k].addEventListener('click', () => renderView(k));
+        });
+
+        // =========================================================
+        // EXPORTAÇÕES (CSV, TXT, PDF)
+        // =========================================================
+        document.getElementById('exportCsvBtn').addEventListener('click', () => {
+            const ths = Array.from(tableHead.querySelectorAll('th')).map(th => `"${th.innerText}"`);
+            const csvRows = [ths.join(',')];
+
+            const trs = Array.from(tableBody.querySelectorAll('tr'));
+            trs.forEach(tr => {
+                const tds = Array.from(tr.querySelectorAll('td')).map(td => `"${td.innerText.replace(/"/g, '""')}"`);
+                if (tds.length > 1) csvRows.push(tds.join(',')); // Ignoring empty states
+            });
+
+            // BOM charset para abrir certo no excel - \uFEFF
+            const blob = new Blob(['\uFEFF' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8' });
+            saveFileBlob(blob, `nfe_${currentView}_${currentXmlData.chave}.csv`);
+        });
+
+        document.getElementById('exportTxtBtn').addEventListener('click', () => {
+            // Reaproveita logica do CSV, muda pra tabulacao \t
+            const ths = Array.from(tableHead.querySelectorAll('th')).map(th => th.innerText.padEnd(20));
+            const txtRows = [ths.join(' | ')];
+
+            const trs = Array.from(tableBody.querySelectorAll('tr'));
+            trs.forEach(tr => {
+                const tds = Array.from(tr.querySelectorAll('td')).map(td => td.innerText.padEnd(20));
+                if (tds.length > 1) txtRows.push(tds.join(' | '));
+            });
+
+            let header = `DADOS DA NOTA - CHAVE: ${currentXmlData.chave}\nTotal: ${formatCurrency(currentXmlData.vTotal)}\n\n`;
+
+            const blob = new Blob([header + txtRows.join('\n')], { type: 'text/plain;charset=utf-8' });
+            saveFileBlob(blob, `nfe_${currentView}_${currentXmlData.chave}.txt`);
+        });
+
+        document.getElementById('exportPdfBtn').addEventListener('click', () => {
+            if (!window.jspdf || !window.jspdf.jsPDF) { alert('Erro ao carregar renderizador PDF'); return; }
+            const doc = new window.jspdf.jsPDF({ orientation: 'landscape', format: 'a4' });
+
+            doc.setFontSize(14);
+            doc.text(`Relatório da Nota Fiscal (${currentView.toUpperCase()})`, 14, 15);
+            doc.setFontSize(10);
+            doc.text(`Chave: ${currentXmlData.chave}`, 14, 22);
+            doc.text(`Destinatário: ${currentXmlData.destNome}  | Emitente: ${currentXmlData.emitNome}`, 14, 28);
+
+            // Usando AutoTable via HTML hook
+            doc.autoTable({
+                html: '#dataTable',
+                startY: 35,
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [42, 60, 240] } // Usa cors parecida com o branding
+            });
+
+            doc.save(`nfe_${currentView}.pdf`);
+        });
+
+        function saveFileBlob(blob, filename) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        // Init
+        loadHistory();
+
+    </script>
+    <script src="script.js"></script>
+</body>
+
+</html>
