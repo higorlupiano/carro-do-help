@@ -12,6 +12,51 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Linhas expansíveis nos agrupamentos */
+        .group-row {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .group-row:hover td {
+            background: var(--card-bg) !important;
+            filter: brightness(1.1);
+        }
+
+        .group-row .expand-icon {
+            display: inline-block;
+            transition: transform 0.25s ease;
+            margin-right: 6px;
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+
+        .group-row.open .expand-icon {
+            transform: rotate(90deg);
+        }
+
+        .group-detail-row {
+            display: none;
+        }
+
+        .group-detail-row.visible {
+            display: table-row;
+        }
+
+        .group-detail-row td {
+            background: rgba(99, 102, 241, 0.05) !important;
+            font-size: 0.82rem;
+            padding-left: 16px !important;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .group-detail-header td {
+            background: rgba(99, 102, 241, 0.14) !important;
+            padding-top: 8px !important;
+            padding-bottom: 8px !important;
+        }
+    </style>
 
     <!-- Incluindo jsPDF e autoTable via CDN local ou estática -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -129,6 +174,7 @@
                 <button class="sidebar-btn" id="btnViewNcm" disabled>📦 Agrupar por NCM</button>
                 <button class="sidebar-btn" id="btnViewCfop" disabled>🔄 Agrupar por CFOP</button>
                 <button class="sidebar-btn" id="btnViewCst" disabled>📊 Agrupar por CST/CSOSN</button>
+                <button class="sidebar-btn" id="btnViewCClassTrib" disabled>🏷️ Agrupar por cClassTrib</button>
             </div>
         </div>
     </main>
@@ -157,7 +203,8 @@
             'divergencia': document.getElementById('btnViewDiverg'),
             'ncm': document.getElementById('btnViewNcm'),
             'cfop': document.getElementById('btnViewCfop'),
-            'cst': document.getElementById('btnViewCst')
+            'cst': document.getElementById('btnViewCst'),
+            'cClassTrib': document.getElementById('btnViewCClassTrib')
         };
 
         // Estado Global
@@ -319,6 +366,7 @@
 
                         // Impostos
                         CST: 'N/A',
+                        cClassTrib: 'N/A',
                         vBC_ICMS: '0.00', vICMS: '0.00', pICMS: '0.00',
                         vIPI: '0.00', vPIS: '0.00', vCOFINS: '0.00',
                         vIBS: '0.00', vCBS: '0.00' // Novos impostos reforma trib
@@ -344,6 +392,12 @@
                         // IBS e CBS (Reforma Tributária - Tag pode estar em desenvolvimento pela Sefaz, mas criamos fallback)
                         itemData.vIBS = getVal(imposto.querySelector('IBS'), 'vIBS') || getVal(imposto.querySelector('IBS'), 'vIBSUFDest') || '0.00';
                         itemData.vCBS = getVal(imposto.querySelector('CBS'), 'vCBS') || '0.00';
+
+                        // cClassTrib - Classificação Tributária (Reforma Tributária)
+                        // A tag pode estar dentro de IBS, CBS, ou diretamente no imposto
+                        itemData.cClassTrib = getVal(imposto, 'cClassTrib') ||
+                            getVal(imposto.querySelector('IBS'), 'cClassTrib') ||
+                            getVal(imposto.querySelector('CBS'), 'cClassTrib') || 'N/A';
                     }
 
                     currentXmlData.itens.push(itemData);
@@ -414,20 +468,26 @@
                     tableRowsData.push({ rowData: raw, searchStr: raw.join(' ').toLowerCase() });
                 });
             }
-            else if (viewId === 'ncm' || viewId === 'cfop' || viewId === 'cst') {
-                const groupKey = viewId === 'ncm' ? 'NCM' : viewId === 'cfop' ? 'CFOP' : 'CST';
-                hHTML = `<tr><th>${groupKey.toUpperCase()}</th><th>Itens Pertencentes (Qtde)</th><th>Somatório (Valor Produto)</th></tr>`;
+            else if (viewId === 'ncm' || viewId === 'cfop' || viewId === 'cst' || viewId === 'cClassTrib') {
+                const groupKey = viewId === 'ncm' ? 'NCM' : viewId === 'cfop' ? 'CFOP' : viewId === 'cst' ? 'CST' : 'cClassTrib';
+                const groupLabel = viewId === 'cClassTrib' ? 'cClassTrib' : groupKey.toUpperCase();
+                hHTML = `<tr><th>${groupLabel}</th><th>Itens Pertencentes (Qtde)</th><th>Somatório (Valor Produto)</th></tr>`;
                 const groups = {};
                 currentXmlData.itens.forEach(i => {
                     const k = i[groupKey] || 'N/A';
-                    if (!groups[k]) groups[k] = { count: 0, val: 0, descStr: [] };
+                    if (!groups[k]) groups[k] = { count: 0, val: 0, itens: [] };
                     groups[k].count++;
                     groups[k].val += parseFloat(i.vProd) || 0;
-                    groups[k].descStr.push(i.xProd);
+                    groups[k].itens.push(i);
                 });
                 for (const g in groups) {
                     const raw = [g, groups[g].count, formatCurrency(groups[g].val)];
-                    tableRowsData.push({ rowData: raw, searchStr: (raw.join(' ') + ' ' + groups[g].descStr.join(' ')).toLowerCase() });
+                    tableRowsData.push({
+                        rowData: raw,
+                        searchStr: (raw.join(' ') + ' ' + groups[g].itens.map(i => i.xProd).join(' ')).toLowerCase(),
+                        expandable: true,
+                        subItems: groups[g].itens
+                    });
                 }
             }
             else if (viewId === 'divergencia') {
@@ -462,16 +522,80 @@
             tableBody.innerHTML = '';
             filterText = filterText.toLowerCase();
             let count = 0;
-            tableRowsData.forEach(r => {
+            tableRowsData.forEach((r, idx) => {
                 if (filterText === '' || r.searchStr.includes(filterText)) {
                     count++;
                     const tr = document.createElement('tr');
-                    r.rowData.forEach(colData => {
-                        const td = document.createElement('td');
-                        td.innerHTML = colData; // innerHTML to parse badges
-                        tr.appendChild(td);
-                    });
-                    tableBody.appendChild(tr);
+
+                    if (r.expandable) {
+                        // Linha de grupo expansível
+                        tr.className = 'group-row';
+                        const groupId = `group-${idx}`;
+
+                        // Ícone + dado na mesma célula
+                        r.rowData.forEach((colData, ci) => {
+                            const td = document.createElement('td');
+                            if (ci === 0) {
+                                td.innerHTML = `<span class="expand-icon">▶</span>${colData}`;
+                            } else {
+                                td.innerHTML = colData;
+                            }
+                            tr.appendChild(td);
+                        });
+
+                        tr.addEventListener('click', () => {
+                            const isOpen = tr.classList.toggle('open');
+                            const detailRows = tableBody.querySelectorAll(`.${groupId}`);
+                            detailRows.forEach(dr => dr.classList.toggle('visible', isOpen));
+                        });
+                        tableBody.appendChild(tr);
+
+                        // Linha de cabeçalho dos sub-itens (oculta por padrão)
+                        const headerRow = document.createElement('tr');
+                        headerRow.className = `group-detail-row group-detail-header ${groupId}`;
+                        const subHeaders = ['Item', 'Código', 'Descrição', 'Qtd / Unid', 'Vl. Unitário', 'Vl. Total'];
+                        subHeaders.forEach(h => {
+                            const th = document.createElement('td');
+                            th.innerHTML = `<strong>${h}</strong>`;
+                            th.style.fontWeight = '600';
+                            th.style.color = 'var(--text-secondary)';
+                            th.style.fontSize = '0.75rem';
+                            th.style.textTransform = 'uppercase';
+                            th.style.letterSpacing = '0.05em';
+                            headerRow.appendChild(th);
+                        });
+                        tableBody.appendChild(headerRow);
+
+                        // Linhas de detalhe (sub-itens) - ocultas por padrão
+                        r.subItems.forEach(item => {
+                            const dtr = document.createElement('tr');
+                            dtr.className = `group-detail-row ${groupId}`;
+                            // Item#, Cód, Descrição, Qtd, Vl.Unit, Vl.Total
+                            const cols = [
+                                `#${item.pos}`,
+                                item.cProd,
+                                item.xProd,
+                                `${formatQtd(item.qCom)} ${item.uCom}`,
+                                formatCurrency(item.vUnCom),
+                                formatCurrency(item.vProd)
+                            ];
+                            cols.forEach(val => {
+                                const td = document.createElement('td');
+                                td.innerHTML = val;
+                                dtr.appendChild(td);
+                            });
+                            tableBody.appendChild(dtr);
+                        });
+
+                    } else {
+                        // Linha normal (sem expansão)
+                        r.rowData.forEach(colData => {
+                            const td = document.createElement('td');
+                            td.innerHTML = colData;
+                            tr.appendChild(td);
+                        });
+                        tableBody.appendChild(tr);
+                    }
                 }
             });
             if (count === 0) tableBody.innerHTML = '<tr><td colspan="15" style="text-align:center;">Nenhum resultado para a busca.</td></tr>';
@@ -493,15 +617,14 @@
             const ths = Array.from(tableHead.querySelectorAll('th')).map(th => `"${th.innerText}"`);
             const csvRows = [ths.join(',')];
 
-            const trs = Array.from(tableBody.querySelectorAll('tr'));
+            const trs = Array.from(tableBody.querySelectorAll('tr'))
+                .filter(tr => !tr.classList.contains('group-detail-row') || tr.classList.contains('visible'));
             trs.forEach(tr => {
                 const tds = Array.from(tr.querySelectorAll('td')).map(td => {
                     let val = td.innerText.replace(/"/g, '""').trim();
-                    // Valores exportados de forma natural, sem fórmulas do Excel
-                    // O ERP ou Sistema que importar tratará como texto puramente.
                     return `"${val}"`;
                 });
-                if (tds.length > 1) csvRows.push(tds.join(',')); // Ignoring empty states
+                if (tds.length > 1) csvRows.push(tds.join(','));
             });
 
             // BOM charset para abrir certo no excel - \uFEFF
@@ -514,7 +637,8 @@
             const ths = Array.from(tableHead.querySelectorAll('th')).map(th => th.innerText.padEnd(20));
             const txtRows = [ths.join(' | ')];
 
-            const trs = Array.from(tableBody.querySelectorAll('tr'));
+            const trs = Array.from(tableBody.querySelectorAll('tr'))
+                .filter(tr => !tr.classList.contains('group-detail-row') || tr.classList.contains('visible'));
             trs.forEach(tr => {
                 const tds = Array.from(tr.querySelectorAll('td')).map(td => td.innerText.padEnd(20));
                 if (tds.length > 1) txtRows.push(tds.join(' | '));
