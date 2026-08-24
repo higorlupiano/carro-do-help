@@ -81,9 +81,8 @@
                             <path
                                 d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
                         </svg>
-                        <span class="tooltip-text">
-                            Padrão: IBSCBS, vItem, infAdProd, IBSCBSTot, vNFTot, dPrevEntrega, cMunFGIBS,
-                            tpCredPresIBSZFM, infProdNFF, infSolicNFF, IS, gCred, indBemMovelUsado
+                        <span class="tooltip-text" id="defaultTagsTooltip">
+                            Padrão: Carregando...
                         </span>
                     </span>
                 </label>
@@ -129,7 +128,19 @@
 
     <script src="script.js"></script>
     <script>
+        const defaultTags = [];
         let processedFiles = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const tooltip = document.getElementById('defaultTagsTooltip');
+            if (tooltip) {
+                if (defaultTags && defaultTags.length > 0) {
+                    tooltip.textContent = `Padrão: ${defaultTags.join(', ')}`;
+                } else {
+                    tooltip.textContent = 'Padrão: Nenhum';
+                }
+            }
+        });
 
         async function processAllXMLs() {
             const fileInput = document.getElementById('xmlFile');
@@ -148,7 +159,6 @@
             progressArea.style.display = 'block';
             progBar.style.width = '0%';
 
-            const defaultTags = ['IBSCBS', 'vItem', 'infAdProd', 'IBSCBSTot', 'vNFTot', 'dPrevEntrega', 'cMunFGIBS', 'tpCredPresIBSZFM', 'infProdNFF', 'infSolicNFF', 'IS', 'gCred', 'indBemMovelUsado'];
             const extraTagsInput = document.getElementById('extraTags').value;
             const extraTags = extraTagsInput
                 ? extraTagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
