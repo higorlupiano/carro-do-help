@@ -15,8 +15,8 @@ const menuConfig = [
     { label: 'Análise de XML', href: 'analise_xml.html' },
     { label: 'Limpar XML', href: 'xml_cleaner.html' },
     { label: 'Simulador Etiquetas', href: 'simulador_etiquetas.html' },
-    { 
-        label: 'Links úteis', 
+    {
+        label: 'Links úteis',
         isDropdown: true,
         // Categorias com submenus (abrem para a esquerda)
         subcategories: [
@@ -36,7 +36,7 @@ const menuConfig = [
             { label: 'Monitor Sefaz', href: 'https://monitor.tecnospeed.com.br/?&filter-type-chart=bar' },
             { label: 'Portal Nacional NF-e', href: 'https://www.nfe.fazenda.gov.br/' },
             { label: 'Lista de Serviços', href: 'https://www.gov.br/nfse/pt-br/mei-e-demais-empresas/codigos-de-tributacao-nacional-nbs' },
-            { label: 'Cidade Homologada NFS-e', href: 'https://tecnospeed.com.br/plugdfe/nfse/#localizacaoNomeCidade' }
+            { label: 'Cidade Homologada NFS-e', href: 'https://cidades.tecnospeed.com.br/' }
         ]
     }
 ];
@@ -50,9 +50,9 @@ function renderNavigation() {
 
     menuConfig.forEach(item => {
         if (!item.isDropdown) {
-            const isActive = (currentPath.includes(item.href) && item.href !== 'index.html') || 
-                             ((currentPath.endsWith('/') || currentPath.endsWith('index.html')) && item.href === 'index.html');
-            
+            const isActive = (currentPath.includes(item.href) && item.href !== 'index.html') ||
+                ((currentPath.endsWith('/') || currentPath.endsWith('index.html')) && item.href === 'index.html');
+
             html += `<a href="${item.href}" class="nav-link cardhover ${isActive ? 'active' : ''}">${item.label}</a>`;
         } else {
             html += `
