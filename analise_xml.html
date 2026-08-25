@@ -56,6 +56,161 @@
             padding-top: 8px !important;
             padding-bottom: 8px !important;
         }
+
+        /* KPI cards clicáveis */
+        .kpi-card.kpi-clickable {
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .kpi-card.kpi-clickable:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.13);
+        }
+
+        .kpi-card.kpi-clickable::after {
+            content: '↗';
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-size: 0.7rem;
+            opacity: 0.45;
+        }
+
+        .kpi-card {
+            position: relative;
+        }
+
+        /* Modal Overlay */
+        .kpi-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            z-index: 2000;
+            backdrop-filter: blur(3px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .kpi-modal-overlay.open {
+            display: flex;
+        }
+
+        .kpi-modal {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            padding: 28px 32px;
+            max-width: 520px;
+            width: 92%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalIn 0.22s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.93) translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .kpi-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-modal-header .modal-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .kpi-modal-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .kpi-modal-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            line-height: 1;
+            padding: 0 4px;
+        }
+
+        .kpi-modal-close:hover {
+            color: var(--text-main);
+        }
+
+        .kpi-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 20px;
+        }
+
+        .kpi-detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .kpi-detail-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .kpi-detail-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+        }
+
+        .kpi-detail-value {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+
+        .kpi-detail-value.highlight {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .kpi-modal-divider {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 16px 0;
+        }
+
+        .kpi-modal-section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
     </style>
 
     <!-- Incluindo jsPDF e autoTable via CDN local ou estática -->
@@ -96,7 +251,7 @@
 
                 <!-- Resumo Rápido (KPIs) - Oculto por padrão -->
                 <div class="kpi-grid" id="kpiGrid" style="display:none;">
-                    <div class="kpi-card kpi-blue">
+                    <div class="kpi-card kpi-blue kpi-clickable" id="kpiCardEmit" onclick="openModal('emit')">
                         <div class="kpi-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -111,7 +266,7 @@
                             <span id="kpiEmit"></span>
                         </div>
                     </div>
-                    <div class="kpi-card kpi-green">
+                    <div class="kpi-card kpi-green kpi-clickable" id="kpiCardDest" onclick="openModal('dest')">
                         <div class="kpi-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -141,7 +296,7 @@
                             <span id="kpiItems"></span>
                         </div>
                     </div>
-                    <div class="kpi-card kpi-purple">
+                    <div class="kpi-card kpi-purple kpi-clickable" id="kpiCardTotal" onclick="openModal('total')">
                         <div class="kpi-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -154,6 +309,67 @@
                             <h4>Valor Total</h4>
                             <span id="kpiTotal"></span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Modais de Detalhes KPI -->
+                <!-- Modal Emitente -->
+                <div class="kpi-modal-overlay" id="modalEmit" onclick="closeModalOnOverlay(event, 'emit')">
+                    <div class="kpi-modal">
+                        <div class="kpi-modal-header">
+                            <div class="modal-icon" style="background:#e0e7ff;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                                    <path d="M3 9h18" />
+                                    <path d="M9 21V9" />
+                                </svg>
+                            </div>
+                            <h3>Dados do Emitente</h3>
+                            <button class="kpi-modal-close" onclick="closeModal('emit')">×</button>
+                        </div>
+                        <div class="kpi-detail-grid" id="modalEmitContent"></div>
+                    </div>
+                </div>
+
+                <!-- Modal Destinatário -->
+                <div class="kpi-modal-overlay" id="modalDest" onclick="closeModalOnOverlay(event, 'dest')">
+                    <div class="kpi-modal">
+                        <div class="kpi-modal-header">
+                            <div class="modal-icon" style="background:#d1fae5;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                </svg>
+                            </div>
+                            <h3>Dados do Destinatário</h3>
+                            <button class="kpi-modal-close" onclick="closeModal('dest')">×</button>
+                        </div>
+                        <div class="kpi-detail-grid" id="modalDestContent"></div>
+                    </div>
+                </div>
+
+                <!-- Modal Valor Total -->
+                <div class="kpi-modal-overlay" id="modalTotal" onclick="closeModalOnOverlay(event, 'total')">
+                    <div class="kpi-modal">
+                        <div class="kpi-modal-header">
+                            <div class="modal-icon" style="background:#ede9fe;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="12" y1="1" x2="12" y2="23" />
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                </svg>
+                            </div>
+                            <h3>Totais da Nota Fiscal</h3>
+                            <button class="kpi-modal-close" onclick="closeModal('total')">×</button>
+                        </div>
+                        <div class="kpi-detail-grid" id="modalTotalContent"></div>
                     </div>
                 </div>
 
@@ -547,9 +763,75 @@
                 const emitNome = emit ? getVal(emit, 'xNome') : 'Desconhecido';
                 const destNome = dest ? getVal(dest, 'xNome') : 'Consumidor / Desconhecido';
 
+                // Dados completos do Emitente
+                const emitEnderNode = emit ? emit.querySelector('enderEmit') : null;
+                const emitData = emit ? {
+                    xNome: getVal(emit, 'xNome'),
+                    xFant: getVal(emit, 'xFant'),
+                    CNPJ: getVal(emit, 'CNPJ'),
+                    CPF: getVal(emit, 'CPF'),
+                    IE: getVal(emit, 'IE'),
+                    IEST: getVal(emit, 'IEST'),
+                    IM: getVal(emit, 'IM'),
+                    CNAE: getVal(emit, 'CNAE'),
+                    CRT: getVal(emit, 'CRT'),
+                    xLgr: emitEnderNode ? getVal(emitEnderNode, 'xLgr') : '',
+                    nro: emitEnderNode ? getVal(emitEnderNode, 'nro') : '',
+                    xCpl: emitEnderNode ? getVal(emitEnderNode, 'xCpl') : '',
+                    xBairro: emitEnderNode ? getVal(emitEnderNode, 'xBairro') : '',
+                    xMun: emitEnderNode ? getVal(emitEnderNode, 'xMun') : '',
+                    UF: emitEnderNode ? getVal(emitEnderNode, 'UF') : '',
+                    CEP: emitEnderNode ? getVal(emitEnderNode, 'CEP') : '',
+                    fone: emitEnderNode ? getVal(emitEnderNode, 'fone') : ''
+                } : null;
+
+                // Dados completos do Destinatário
+                const destEnderNode = dest ? dest.querySelector('enderDest') : null;
+                const destData = dest ? {
+                    xNome: getVal(dest, 'xNome'),
+                    CNPJ: getVal(dest, 'CNPJ'),
+                    CPF: getVal(dest, 'CPF'),
+                    IE: getVal(dest, 'IE'),
+                    ISUF: getVal(dest, 'ISUF'),
+                    email: getVal(dest, 'email'),
+                    xLgr: destEnderNode ? getVal(destEnderNode, 'xLgr') : '',
+                    nro: destEnderNode ? getVal(destEnderNode, 'nro') : '',
+                    xCpl: destEnderNode ? getVal(destEnderNode, 'xCpl') : '',
+                    xBairro: destEnderNode ? getVal(destEnderNode, 'xBairro') : '',
+                    xMun: destEnderNode ? getVal(destEnderNode, 'xMun') : '',
+                    UF: destEnderNode ? getVal(destEnderNode, 'UF') : '',
+                    CEP: destEnderNode ? getVal(destEnderNode, 'CEP') : '',
+                    fone: destEnderNode ? getVal(destEnderNode, 'fone') : ''
+                } : null;
+
+                // Dados completos dos Totais (ICMSTot)
+                const totData = ICMSTot ? {
+                    vBC: getVal(ICMSTot, 'vBC'),
+                    vICMS: getVal(ICMSTot, 'vICMS'),
+                    vICMSDeson: getVal(ICMSTot, 'vICMSDeson'),
+                    vFCP: getVal(ICMSTot, 'vFCP'),
+                    vBCST: getVal(ICMSTot, 'vBCST'),
+                    vST: getVal(ICMSTot, 'vST'),
+                    vFCPST: getVal(ICMSTot, 'vFCPST'),
+                    vFCPSTRet: getVal(ICMSTot, 'vFCPSTRet'),
+                    vProd: getVal(ICMSTot, 'vProd'),
+                    vFrete: getVal(ICMSTot, 'vFrete'),
+                    vSeg: getVal(ICMSTot, 'vSeg'),
+                    vDesc: getVal(ICMSTot, 'vDesc'),
+                    vII: getVal(ICMSTot, 'vII'),
+                    vIPI: getVal(ICMSTot, 'vIPI'),
+                    vIPIDevol: getVal(ICMSTot, 'vIPIDevol'),
+                    vPIS: getVal(ICMSTot, 'vPIS'),
+                    vCOFINS: getVal(ICMSTot, 'vCOFINS'),
+                    vOutro: getVal(ICMSTot, 'vOutro'),
+                    vNF: getVal(ICMSTot, 'vNF'),
+                    vTotTrib: getVal(ICMSTot, 'vTotTrib')
+                } : null;
+
                 currentXmlData = {
                     chave: chave, nNF: nNF, natOp: natOp, vTotal: vTotal,
                     emitNome: emitNome, destNome: destNome,
+                    emitData: emitData, destData: destData, totData: totData,
                     itens: []
                 };
 
@@ -645,7 +927,11 @@
             Object.values(btnsView).forEach(btn => btn.disabled = false);
             dropzone.style.display = 'flex';
             dropzone.style.padding = '15px'; // Reduz a dropzone que já carregou algo
-            dropzone.querySelector('svg').style.display = 'none';
+            // Troca o ícone de upload pelo ícone de check (arquivo carregado)
+            const dzIconWrap = dropzone.querySelector('.dropzone-icon-wrap');
+            if (dzIconWrap) {
+                dzIconWrap.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`;
+            }
         }
 
         function setActiveSidebarBtn(viewName) {
@@ -958,8 +1244,136 @@
             URL.revokeObjectURL(a.href);
         }
 
+
+        // =========================================================
+        // MODAIS DE DETALHES KPI
+        // =========================================================
+        function detailItem(label, value, fullWidth = false, skipZero = false) {
+            if (!value) return '';
+            if (skipZero && value === 'R$ 0,00') return '';
+            return `<div class="kpi-detail-item${fullWidth ? ' full-width' : ''}">
+                <span class="kpi-detail-label">${label}</span>
+                <span class="kpi-detail-value">${value}</span>
+            </div>`;
+        }
+        function detailItemHighlight(label, value) {
+            if (!value) return '';
+            return `<div class="kpi-detail-item full-width">
+                <span class="kpi-detail-label">${label}</span>
+                <span class="kpi-detail-value highlight">${value}</span>
+            </div>`;
+        }
+        function formatCNPJ(v) {
+            if (!v) return '';
+            return v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+        }
+        function formatCPF(v) {
+            if (!v) return '';
+            return v.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+        }
+        function formatCEP(v) {
+            if (!v) return '';
+            return v.replace(/^(\d{5})(\d{3})$/, '$1-$2');
+        }
+        function formatFone(v) {
+            if (!v) return '';
+            v = v.replace(/\D/g, '');
+            if (v.length === 11) return v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+            if (v.length === 10) return v.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
+            return v;
+        }
+        const CRT_MAP = { '1': '1 – Simples Nacional', '2': '2 – Simples Nacional – excesso', '3': '3 – Regime Normal', '4': '4 – Simples Nacional – SIMEI' };
+
+        function openModal(type) {
+            if (!currentXmlData) return;
+            let content = '';
+
+            if (type === 'emit' && currentXmlData.emitData) {
+                const d = currentXmlData.emitData;
+                const doc = d.CNPJ ? formatCNPJ(d.CNPJ) : d.CPF ? formatCPF(d.CPF) : '';
+                const docLabel = d.CNPJ ? 'CNPJ' : 'CPF';
+                const endereco = [d.xLgr, d.nro ? 'nº ' + d.nro : '', d.xCpl].filter(Boolean).join(', ');
+                content += detailItem('Razão Social', d.xNome, true);
+                if (d.xFant) content += detailItem('Nome Fantasia', d.xFant, true);
+                content += detailItem(docLabel, doc);
+                content += detailItem('Insc. Estadual', d.IE);
+                if (d.IEST) content += detailItem('IE ST', d.IEST);
+                if (d.IM) content += detailItem('Insc. Municipal', d.IM);
+                if (d.CNAE) content += detailItem('CNAE', d.CNAE);
+                if (d.CRT) content += detailItem('Regime Trib. (CRT)', CRT_MAP[d.CRT] || d.CRT);
+                if (d.fone) content += detailItem('Telefone', formatFone(d.fone));
+                if (endereco) content += detailItem('Logradouro', endereco, true);
+                if (d.xBairro) content += detailItem('Bairro', d.xBairro);
+                if (d.xMun) content += detailItem('Município / UF', `${d.xMun} / ${d.UF}`);
+                if (d.CEP) content += detailItem('CEP', formatCEP(d.CEP));
+            }
+
+            if (type === 'dest' && currentXmlData.destData) {
+                const d = currentXmlData.destData;
+                const doc = d.CNPJ ? formatCNPJ(d.CNPJ) : d.CPF ? formatCPF(d.CPF) : '';
+                const docLabel = d.CNPJ ? 'CNPJ' : 'CPF';
+                const endereco = [d.xLgr, d.nro ? 'nº ' + d.nro : '', d.xCpl].filter(Boolean).join(', ');
+                content += detailItem('Razão Social', d.xNome, true);
+                content += detailItem(docLabel, doc);
+                if (d.IE) content += detailItem('Insc. Estadual', d.IE);
+                if (d.ISUF) content += detailItem('ISUF', d.ISUF);
+                if (d.email) content += detailItem('E-mail', d.email);
+                if (d.fone) content += detailItem('Telefone', formatFone(d.fone));
+                if (endereco) content += detailItem('Logradouro', endereco, true);
+                if (d.xBairro) content += detailItem('Bairro', d.xBairro);
+                if (d.xMun) content += detailItem('Município / UF', `${d.xMun} / ${d.UF}`);
+                if (d.CEP) content += detailItem('CEP', formatCEP(d.CEP));
+            }
+
+            if (type === 'total' && currentXmlData.totData) {
+                const t = currentXmlData.totData;
+                const fc = formatCurrency;
+                content += detailItemHighlight('Valor Total da NF-e', fc(t.vNF));
+                content += detailItem('Valor Total dos Produtos', fc(t.vProd));
+                content += detailItem('Base de Cálculo ICMS', fc(t.vBC));
+                content += detailItem('Valor do ICMS', fc(t.vICMS));
+                content += detailItem('ICMS Desonerado', fc(t.vICMSDeson), false, true);
+                content += detailItem('Total FCP', fc(t.vFCP), false, true);
+                content += detailItem('Base de Cálculo ICMS ST', fc(t.vBCST), false, true);
+                content += detailItem('Total ICMS ST', fc(t.vST), false, true);
+                content += detailItem('FCP ST', fc(t.vFCPST), false, true);
+                content += detailItem('FCP ST Retido', fc(t.vFCPSTRet), false, true);
+                content += detailItem('Total IPI', fc(t.vIPI), false, true);
+                content += detailItem('IPI Devolvido', fc(t.vIPIDevol), false, true);
+                content += detailItem('Valor PIS', fc(t.vPIS));
+                content += detailItem('Valor COFINS', fc(t.vCOFINS));
+                content += detailItem('Imposto de Importação', fc(t.vII), false, true);
+                content += detailItem('Valor do Frete', fc(t.vFrete), false, true);
+                content += detailItem('Valor do Seguro', fc(t.vSeg), false, true);
+                content += detailItem('Valor do Desconto', fc(t.vDesc), false, true);
+                content += detailItem('Outras Despesas Acessórias', fc(t.vOutro), false, true);
+                if (t.vTotTrib) content += detailItem('Trib. Aprox. (Lei 12.741)', fc(t.vTotTrib), true);
+            }
+
+            document.getElementById(`modal${type.charAt(0).toUpperCase() + type.slice(1)}Content`).innerHTML = content || '<p style="color:var(--text-muted);font-size:0.9rem;">Nenhum dado disponível.</p>';
+            document.getElementById(`modal${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('open');
+        }
+
+        function closeModal(type) {
+            document.getElementById(`modal${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.remove('open');
+        }
+
+        function closeModalOnOverlay(event, type) {
+            if (event.target === event.currentTarget) closeModal(type);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                ['Emit', 'Dest', 'Total'].forEach(t => {
+                    const el = document.getElementById('modal' + t);
+                    if (el) el.classList.remove('open');
+                });
+            }
+        });
+
         // Init
         loadHistory();
+
 
     </script>
     <script src="script.js"></script>
