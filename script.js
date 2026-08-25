@@ -20,14 +20,15 @@ const menuConfig = [
         isDropdown: true,
         directLinks: [
             { label: 'Cidade Homologada NFS-e', href: 'https://cidades.tecnospeed.com.br/' },
-            { label: 'Consultar CNPJ', href: 'https://solucoes.receita.fazenda.gov.br/Servicos/cnpjreva/cnpjreva_solicitacao.asp' },
-            { label: 'Consultar NCM', href: 'https://portalunico.siscomex.gov.br/classif/#/sumario?perfil=publico' },
-            { label: 'Consultar NF-e', href: 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx' },
-            { label: 'Lista de Serviços', href: 'https://www.gov.br/nfse/pt-br/mei-e-demais-empresas/codigos-de-tributacao-nacional-nbs' },
+            { label: 'Consulta CNPJ', href: 'https://solucoes.receita.fazenda.gov.br/Servicos/cnpjreva/cnpjreva_solicitacao.asp' },
+            { label: 'Consulta NCM', href: 'https://portalunico.siscomex.gov.br/classif/#/sumario?perfil=publico' },
+            { label: 'Consulta NF-e', href: 'https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx' },
+            { label: 'Lista de Serviços Nacional', href: 'https://www.gov.br/nfse/pt-br/mei-e-demais-empresas/codigos-de-tributacao-nacional-nbs' },
             { label: 'Monitor Sefaz', href: 'https://monitor.tecnospeed.com.br/?&filter-type-chart=bar' },
-            { label: 'Portal Nacional NF-e', href: 'https://www.nfe.fazenda.gov.br/' },
             { label: 'Sintegra', href: 'http://www.sintegra.gov.br/' },
-            { label: 'Tabela CEST', href: 'https://www.codigocest.com.br/' }
+            { label: 'Consulta CEST', href: 'https://www.codigocest.com.br/' },
+            { label: 'Classificação Tributária', href: 'https://dfe-portal.svrs.rs.gov.br/Cff/ClassificacaoTributaria' },
+            { label: 'Consulta IE', href: 'https://www.consultaie.com.br/' }
         ]
     }
 ];
