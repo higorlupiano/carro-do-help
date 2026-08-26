@@ -820,7 +820,8 @@
                     xMun: destEnderNode ? getVal(destEnderNode, 'xMun') : '',
                     UF: destEnderNode ? getVal(destEnderNode, 'UF') : '',
                     CEP: destEnderNode ? getVal(destEnderNode, 'CEP') : '',
-                    fone: destEnderNode ? getVal(destEnderNode, 'fone') : ''
+                    fone: destEnderNode ? getVal(destEnderNode, 'fone') : '',
+                    indIEDest: getVal(dest, 'indIEDest')
                 } : null;
 
                 // Dados completos dos Totais (ICMSTot)
@@ -867,7 +868,8 @@
                         natOp: getVal(ide, 'natOp'),
                         indPres: getVal(ide, 'indPres'),
                         tpEmis: getVal(ide, 'tpEmis'),
-                        cMunFG: getVal(ide, 'cMunFG')
+                        cMunFG: getVal(ide, 'cMunFG'),
+                        indFinal: getVal(ide, 'indFinal')
                     } : null,
                     itens: []
                 };
@@ -1333,6 +1335,7 @@
                 const INDPRES = { '0': '0 – Não se aplica', '1': '1 – Operação presencial', '2': '2 – Operação não presencial (internet)', '3': '3 – Operação não presencial (teleatendimento)', '4': '4 – NFC-e entrega em domicílio', '5': '5 – Operação presencial fora estabelecimento', '9': '9 – Operação não presencial (outros)' };
                 const TPEMIS = { '1': '1 – Emissão normal', '2': '2 – Contingência FS-IA', '3': '3 – Contingência SCAN', '4': '4 – Contingência DPEC', '5': '5 – Contingência FS-DA', '6': '6 – Contingência SVC-AN', '7': '7 – Contingência SVC-RS', '9': '9 – Contingência offline NFC-e' };
                 const MOD = { '55': 'NF-e (mod. 55)', '65': 'NFC-e (mod. 65)' };
+                const INDFINAL = { '0': '0 – Normal', '1': '1 – Consumidor Final' };
 
                 function fmtDate(v) {
                     if (!v) return '';
@@ -1349,6 +1352,7 @@
                 content += detailItem('Tipo de Operação', TPNF[d.tpNF] || d.tpNF);
                 content += detailItem('Finalidade', FINNFE[d.finNFe] || d.finNFe);
                 content += detailItem('Ambiente', TPAMB[d.tpAmb] || d.tpAmb);
+                if (d.indFinal) content += detailItem('Consumidor Final', INDFINAL[d.indFinal] || d.indFinal);
                 content += detailItem('Natureza da Operação', d.natOp, true);
                 content += detailItem('Indicador de Presença', INDPRES[d.indPres] || d.indPres, true);
                 if (d.tpEmis) content += detailItem('Tipo de Emissão', TPEMIS[d.tpEmis] || d.tpEmis, true);
@@ -1381,6 +1385,14 @@
                 const endereco = [d.xLgr, d.nro ? 'nº ' + d.nro : '', d.xCpl].filter(Boolean).join(', ');
                 content += detailItem('Razão Social', d.xNome, true);
                 content += detailItem(docLabel, doc);
+
+                const IND_IE_DEST = {
+                    '1': '1 – Contribuinte ICMS',
+                    '2': '2 – Contribuinte Isento',
+                    '9': '9 – Não Contribuinte'
+                };
+                if (d.indIEDest) content += detailItem('Ind. Inscrição Estadual', IND_IE_DEST[d.indIEDest] || d.indIEDest);
+
                 if (d.IE) content += detailItem('Insc. Estadual', d.IE);
                 if (d.ISUF) content += detailItem('ISUF', d.ISUF);
                 if (d.email) content += detailItem('E-mail', d.email);
