@@ -282,7 +282,7 @@
                             <span id="kpiDest"></span>
                         </div>
                     </div>
-                    <div class="kpi-card kpi-orange">
+                    <div class="kpi-card kpi-orange kpi-clickable" id="kpiCardIde" onclick="openModal('ide')">
                         <div class="kpi-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -370,6 +370,25 @@
                             <button class="kpi-modal-close" onclick="closeModal('total')">×</button>
                         </div>
                         <div class="kpi-detail-grid" id="modalTotalContent"></div>
+                    </div>
+                </div>
+
+                <!-- Modal Identificação da NF-e -->
+                <div class="kpi-modal-overlay" id="modalIde" onclick="closeModalOnOverlay(event, 'ide')">
+                    <div class="kpi-modal">
+                        <div class="kpi-modal-header">
+                            <div class="modal-icon" style="background:#ffedd5;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path
+                                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                </svg>
+                            </div>
+                            <h3>Identificação da NF-e</h3>
+                            <button class="kpi-modal-close" onclick="closeModal('ide')">×</button>
+                        </div>
+                        <div class="kpi-detail-grid" id="modalIdeContent"></div>
                     </div>
                 </div>
 
@@ -805,6 +824,7 @@
                 } : null;
 
                 // Dados completos dos Totais (ICMSTot)
+                const totalNode = xmlDoc.getElementsByTagName('total')[0];
                 const totData = ICMSTot ? {
                     vBC: getVal(ICMSTot, 'vBC'),
                     vICMS: getVal(ICMSTot, 'vICMS'),
@@ -825,13 +845,30 @@
                     vCOFINS: getVal(ICMSTot, 'vCOFINS'),
                     vOutro: getVal(ICMSTot, 'vOutro'),
                     vNF: getVal(ICMSTot, 'vNF'),
-                    vTotTrib: getVal(ICMSTot, 'vTotTrib')
+                    vTotTrib: getVal(ICMSTot, 'vTotTrib'),
+                    vIBS: getVal(ICMSTot, 'vIBS') || (totalNode ? getVal(totalNode, 'vIBS') : ''),
+                    vCBS: getVal(ICMSTot, 'vCBS') || (totalNode ? getVal(totalNode, 'vCBS') : '')
                 } : null;
 
                 currentXmlData = {
                     chave: chave, nNF: nNF, natOp: natOp, vTotal: vTotal,
                     emitNome: emitNome, destNome: destNome,
                     emitData: emitData, destData: destData, totData: totData,
+                    ideData: ide ? {
+                        chave: infNFe.getAttribute('Id') ? infNFe.getAttribute('Id').replace('NFe', '') : '',
+                        nNF: getVal(ide, 'nNF'),
+                        serie: getVal(ide, 'serie'),
+                        mod: getVal(ide, 'mod'),
+                        dhEmi: getVal(ide, 'dhEmi'),
+                        dhSaiEnt: getVal(ide, 'dhSaiEnt'),
+                        tpNF: getVal(ide, 'tpNF'),
+                        finNFe: getVal(ide, 'finNFe'),
+                        tpAmb: getVal(ide, 'tpAmb'),
+                        natOp: getVal(ide, 'natOp'),
+                        indPres: getVal(ide, 'indPres'),
+                        tpEmis: getVal(ide, 'tpEmis'),
+                        cMunFG: getVal(ide, 'cMunFG')
+                    } : null,
                     itens: []
                 };
 
@@ -1288,6 +1325,35 @@
             if (!currentXmlData) return;
             let content = '';
 
+            if (type === 'ide' && currentXmlData.ideData) {
+                const d = currentXmlData.ideData;
+                const TPNF = { '0': '0 – Entrada', '1': '1 – Saída' };
+                const FINNFE = { '1': '1 – NF-e normal', '2': '2 – NF-e complementar', '3': '3 – NF-e de ajuste', '4': '4 – Devolução/Retorno' };
+                const TPAMB = { '1': '1 – Produção', '2': '2 – Homologação' };
+                const INDPRES = { '0': '0 – Não se aplica', '1': '1 – Operação presencial', '2': '2 – Operação não presencial (internet)', '3': '3 – Operação não presencial (teleatendimento)', '4': '4 – NFC-e entrega em domicílio', '5': '5 – Operação presencial fora estabelecimento', '9': '9 – Operação não presencial (outros)' };
+                const TPEMIS = { '1': '1 – Emissão normal', '2': '2 – Contingência FS-IA', '3': '3 – Contingência SCAN', '4': '4 – Contingência DPEC', '5': '5 – Contingência FS-DA', '6': '6 – Contingência SVC-AN', '7': '7 – Contingência SVC-RS', '9': '9 – Contingência offline NFC-e' };
+                const MOD = { '55': 'NF-e (mod. 55)', '65': 'NFC-e (mod. 65)' };
+
+                function fmtDate(v) {
+                    if (!v) return '';
+                    // dhEmi format: 2024-01-15T10:30:00-03:00
+                    try { return new Date(v).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }); } catch (e) { return v; }
+                }
+
+                content += detailItem('Chave de Acesso', d.chave, true);
+                content += detailItem('Número da NF-e', d.nNF);
+                content += detailItem('Série', d.serie);
+                content += detailItem('Modelo', MOD[d.mod] || d.mod);
+                content += detailItem('Data de Emissão', fmtDate(d.dhEmi));
+                if (d.dhSaiEnt) content += detailItem('Data de Saída/Entrada', fmtDate(d.dhSaiEnt));
+                content += detailItem('Tipo de Operação', TPNF[d.tpNF] || d.tpNF);
+                content += detailItem('Finalidade', FINNFE[d.finNFe] || d.finNFe);
+                content += detailItem('Ambiente', TPAMB[d.tpAmb] || d.tpAmb);
+                content += detailItem('Natureza da Operação', d.natOp, true);
+                content += detailItem('Indicador de Presença', INDPRES[d.indPres] || d.indPres, true);
+                if (d.tpEmis) content += detailItem('Tipo de Emissão', TPEMIS[d.tpEmis] || d.tpEmis, true);
+            }
+
             if (type === 'emit' && currentXmlData.emitData) {
                 const d = currentXmlData.emitData;
                 const doc = d.CNPJ ? formatCNPJ(d.CNPJ) : d.CPF ? formatCPF(d.CPF) : '';
@@ -1342,6 +1408,10 @@
                 content += detailItem('IPI Devolvido', fc(t.vIPIDevol), false, true);
                 content += detailItem('Valor PIS', fc(t.vPIS));
                 content += detailItem('Valor COFINS', fc(t.vCOFINS));
+                if (t.vIBS || t.vCBS) {
+                    content += detailItem('IBS (Reforma Trib.)', t.vIBS ? fc(t.vIBS) : 'R$ 0,00');
+                    content += detailItem('CBS (Reforma Trib.)', t.vCBS ? fc(t.vCBS) : 'R$ 0,00');
+                }
                 content += detailItem('Imposto de Importação', fc(t.vII), false, true);
                 content += detailItem('Valor do Frete', fc(t.vFrete), false, true);
                 content += detailItem('Valor do Seguro', fc(t.vSeg), false, true);
@@ -1364,7 +1434,7 @@
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                ['Emit', 'Dest', 'Total'].forEach(t => {
+                ['Emit', 'Dest', 'Ide', 'Total'].forEach(t => {
                     const el = document.getElementById('modal' + t);
                     if (el) el.classList.remove('open');
                 });
