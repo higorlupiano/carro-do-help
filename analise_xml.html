@@ -607,7 +607,7 @@
                             <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
                             <line x1="7" y1="7" x2="7.01" y2="7" />
                         </svg></span>
-                    Agrupar por cClassTrib
+                    Agrupar por CST do IBSCBS
                     <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -896,6 +896,8 @@
                         // Impostos
                         CST: 'N/A',
                         cClassTrib: 'N/A',
+                        CST_IBSCBS: 'N/A',
+                        vBC_IBSCBS: '0.00', vIBSUF: '0.00', vIBSMun: '0.00',
                         vBC_ICMS: '0.00', vICMS: '0.00', pICMS: '0.00',
                         vIPI: '0.00', vPIS: '0.00', vCOFINS: '0.00',
                         vIBS: '0.00', vCBS: '0.00' // Novos impostos reforma trib
@@ -921,6 +923,27 @@
                         // IBS e CBS (Reforma Tributária - Tag pode estar em desenvolvimento pela Sefaz, mas criamos fallback)
                         itemData.vIBS = getVal(imposto.querySelector('IBS'), 'vIBS') || getVal(imposto.querySelector('IBS'), 'vIBSUFDest') || '0.00';
                         itemData.vCBS = getVal(imposto.querySelector('CBS'), 'vCBS') || '0.00';
+
+                        let cstIbsCbs = 'N/A';
+                        let vBcIbsCbs = '0.00', vIbsUf = '0.00', vIbsMun = '0.00', vCbs = '0.00';
+                        const allImpostos = imposto.children;
+                        for (let k = 0; k < allImpostos.length; k++) {
+                            const node = allImpostos[k];
+                            // Extraindo a partir das raízes sugeridas para Reforma Tributária
+                            if (node.tagName.startsWith('IBS') || node.tagName.startsWith('CBS')) {
+                                cstIbsCbs = getVal(node, 'CST') || cstIbsCbs;
+                                vBcIbsCbs = getVal(node, 'vBC') || vBcIbsCbs;
+                                vIbsUf = getVal(node, 'vIBSUF') || vIbsUf;
+                                vIbsMun = getVal(node, 'vIBSMun') || vIbsMun;
+                                vCbs = getVal(node, 'vCBS') || vCbs;
+                            }
+                        }
+
+                        itemData.CST_IBSCBS = cstIbsCbs !== 'N/A' ? cstIbsCbs : 'N/A';
+                        itemData.vBC_IBSCBS = vBcIbsCbs !== '0.00' ? vBcIbsCbs : '0.00';
+                        itemData.vIBSUF = vIbsUf !== '0.00' ? vIbsUf : '0.00';
+                        itemData.vIBSMun = vIbsMun !== '0.00' ? vIbsMun : '0.00';
+                        itemData.vCBS = itemData.vCBS !== '0.00' ? itemData.vCBS : (vCbs !== '0.00' ? vCbs : '0.00');
 
                         // cClassTrib - Classificação Tributária (Reforma Tributária)
                         // A tag pode estar dentro de IBS, CBS, ou diretamente no imposto
@@ -1002,19 +1025,39 @@
                 });
             }
             else if (viewId === 'ncm' || viewId === 'cfop' || viewId === 'cst' || viewId === 'cClassTrib') {
-                const groupKey = viewId === 'ncm' ? 'NCM' : viewId === 'cfop' ? 'CFOP' : viewId === 'cst' ? 'CST' : 'cClassTrib';
-                const groupLabel = viewId === 'cClassTrib' ? 'cClassTrib' : groupKey.toUpperCase();
-                hHTML = `<tr><th>${groupLabel}</th><th>Itens Pertencentes (Qtde)</th><th>Somatório (Valor Produto)</th></tr>`;
+                const groupKey = viewId === 'ncm' ? 'NCM' : viewId === 'cfop' ? 'CFOP' : viewId === 'cst' ? 'CST' : 'CST_IBSCBS';
+                const groupLabel = viewId === 'cClassTrib' ? 'CST do IBSCBS' : groupKey.toUpperCase();
+
+                if (viewId === 'cClassTrib') {
+                    hHTML = `<tr><th>${groupLabel}</th><th>Itens (Qtde)</th><th>Somatório vBC IBSCBS</th><th>Somatório vIBSUF</th><th>Somatório vIBSMun</th><th>Somatório vCBS</th></tr>`;
+                } else {
+                    hHTML = `<tr><th>${groupLabel}</th><th>Itens (Qtde)</th><th>Somatório (Valor Produto)</th></tr>`;
+                }
+
                 const groups = {};
                 currentXmlData.itens.forEach(i => {
-                    const k = i[groupKey] || 'N/A';
-                    if (!groups[k]) groups[k] = { count: 0, val: 0, itens: [] };
+                    let k = i[groupKey];
+                    if (k === undefined || k === null || k === '') {
+                        k = 'N/A';
+                    }
+                    if (!groups[k]) {
+                        groups[k] = { count: 0, val: 0, vBcIbsCbs: 0, vIbsUf: 0, vIbsMun: 0, vCbs: 0, itens: [] };
+                    }
                     groups[k].count++;
                     groups[k].val += parseFloat(i.vProd) || 0;
+                    groups[k].vBcIbsCbs += parseFloat(i.vBC_IBSCBS) || 0;
+                    groups[k].vIbsUf += parseFloat(i.vIBSUF) || 0;
+                    groups[k].vIbsMun += parseFloat(i.vIBSMun) || 0;
+                    groups[k].vCbs += parseFloat(i.vCBS) || 0;
                     groups[k].itens.push(i);
                 });
                 for (const g in groups) {
-                    const raw = [g, groups[g].count, formatCurrency(groups[g].val)];
+                    let raw;
+                    if (viewId === 'cClassTrib') {
+                        raw = [g, groups[g].count, formatCurrency(groups[g].vBcIbsCbs), formatCurrency(groups[g].vIbsUf), formatCurrency(groups[g].vIbsMun), formatCurrency(groups[g].vCbs)];
+                    } else {
+                        raw = [g, groups[g].count, formatCurrency(groups[g].val)];
+                    }
                     tableRowsData.push({
                         rowData: raw,
                         searchStr: (raw.join(' ') + ' ' + groups[g].itens.map(i => i.xProd).join(' ')).toLowerCase(),
@@ -1156,7 +1199,12 @@
                         // Linha de cabeçalho dos sub-itens (oculta por padrão)
                         const headerRow = document.createElement('tr');
                         headerRow.className = `group-detail-row group-detail-header ${groupId}`;
-                        const subHeaders = ['Item', 'Código', 'Descrição', 'Qtd / Unid', 'Vl. Unitário', 'Vl. Total'];
+
+                        let subHeaders = ['Item', 'Código', 'Descrição', 'Qtd / Unid', 'Vl. Unitário', 'Vl. Total'];
+                        if (currentView === 'cClassTrib') {
+                            subHeaders = ['cClassTrib', 'Item', 'Código', 'Descrição', 'vBC IBSCBS', 'vIBSUF', 'vIBSMun', 'vCBS'];
+                        }
+
                         subHeaders.forEach(h => {
                             const th = document.createElement('td');
                             th.innerHTML = `<strong>${h}</strong>`;
@@ -1173,15 +1221,28 @@
                         r.subItems.forEach(item => {
                             const dtr = document.createElement('tr');
                             dtr.className = `group-detail-row ${groupId}`;
-                            // Item#, Cód, Descrição, Qtd, Vl.Unit, Vl.Total
-                            const cols = [
-                                `#${item.pos}`,
-                                item.cProd,
-                                item.xProd,
-                                `${formatQtd(item.qCom)} ${item.uCom}`,
-                                formatCurrency(item.vUnCom),
-                                formatCurrency(item.vProd)
-                            ];
+                            let cols;
+                            if (currentView === 'cClassTrib') {
+                                cols = [
+                                    item.cClassTrib,
+                                    `#${item.pos}`,
+                                    item.cProd,
+                                    item.xProd,
+                                    formatCurrency(item.vBC_IBSCBS),
+                                    formatCurrency(item.vIBSUF),
+                                    formatCurrency(item.vIBSMun),
+                                    formatCurrency(item.vCBS)
+                                ];
+                            } else {
+                                cols = [
+                                    `#${item.pos}`,
+                                    item.cProd,
+                                    item.xProd,
+                                    `${formatQtd(item.qCom)} ${item.uCom}`,
+                                    formatCurrency(item.vUnCom),
+                                    formatCurrency(item.vProd)
+                                ];
+                            }
                             cols.forEach(val => {
                                 const td = document.createElement('td');
                                 td.innerHTML = val;
