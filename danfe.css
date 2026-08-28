@@ -1,0 +1,232 @@
+:root {
+    --border-color: #000;
+}
+
+body {
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 10px;
+    color: #000;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* Área da Folha A4 */
+.danfe-page {
+    background: #fff;
+    width: 210mm;
+    min-height: 297mm;
+    padding: 5mm;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    border: 1px solid #ccc;
+}
+
+/* Esconder elementos na impressão */
+@media print {
+    body {
+        background-color: #fff;
+        padding: 0;
+    }
+
+    .danfe-page {
+        box-shadow: none;
+        border: none;
+        width: 100%;
+        padding: 0;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+}
+
+/* Cabeçalho do Canhoto */
+.canhoto {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 5mm;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+}
+
+.canhoto-title {
+    grid-column: 1 / -1;
+    border-bottom: 1px solid var(--border-color);
+    padding: 3px;
+    font-size: 9px;
+}
+
+.canhoto-assinatura {
+    border-right: 1px solid var(--border-color);
+    padding: 3px;
+    height: 12mm;
+}
+
+.canhoto-nfe {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Estrutura de Borda Arredondada Genérica */
+.box {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 2mm;
+    overflow: hidden;
+}
+
+.box-title {
+    font-weight: bold;
+    font-size: 11px;
+    margin-bottom: 2px;
+}
+
+/* Cabeçalho Principal */
+.header-grid {
+    display: grid;
+    grid-template-columns: 85mm 30mm 85mm;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 2mm;
+}
+
+.h-col {
+    padding: 3px;
+}
+
+.h-emitente {
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.h-emitente h2 {
+    margin: 0;
+    font-size: 14px;
+}
+
+.h-emitente p {
+    margin: 2px 0;
+    font-size: 10px;
+}
+
+.h-danfe {
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.h-danfe h3 {
+    margin: 0 0 5px 0;
+    font-size: 12px;
+}
+
+.h-danfe-tp {
+    border: 1px solid var(--border-color);
+    padding: 2px 10px;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.h-barcode {
+    padding: 3px;
+    display: flex;
+    flex-direction: column;
+}
+
+.barcode-img {
+    width: 100%;
+    height: 12mm;
+}
+
+.h-chave-label {
+    font-size: 8px;
+    margin-top: 4px;
+}
+
+.h-chave-val {
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-align: center;
+    margin-top: 2px;
+}
+
+/* Linhas com Campos (Label em cima, valor embaixo) */
+.field-row {
+    display: flex;
+    border-top: 1px solid var(--border-color);
+}
+
+.field-row:first-child {
+    border-top: none;
+}
+
+.field {
+    border-right: 1px solid var(--border-color);
+    padding: 2px 4px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.field:last-child {
+    border-right: none;
+}
+
+.f-label {
+    font-size: 7px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+}
+
+.f-val {
+    font-size: 10px;
+    font-weight: bold;
+    min-height: 12px;
+}
+
+/* Tabela de Produtos */
+.table-produtos {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8px;
+}
+
+.table-produtos th,
+.table-produtos td {
+    border: 1px solid var(--border-color);
+    padding: 2px;
+}
+
+.table-produtos th {
+    background-color: #f9f9f9;
+    text-transform: uppercase;
+    font-size: 7px;
+}
+
+.table-produtos td {
+    text-align: right;
+}
+
+.table-produtos td.col-str {
+    text-align: left;
+}

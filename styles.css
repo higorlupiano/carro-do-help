@@ -385,7 +385,7 @@ input[type="file"] {
    ========================================================================== */
 .analysis-container {
     display: grid;
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: 310px 1fr;
     gap: 24px;
     margin-top: 0px;
     margin-bottom: 0px;
@@ -1568,4 +1568,192 @@ input[type="file"] {
 .badge-warning {
     background: #f59e0b;
     color: #000;
+}
+
+/* ==========================================================================
+   COMPONENT: AUTOTESTE XML
+   ========================================================================== */
+.autoteste-container {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.autoteste-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 5px;
+}
+
+.autoteste-stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.autoteste-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.autoteste-stat-card.active {
+    box-shadow: 0 0 0 2px var(--primary-color);
+    background-color: var(--primary-light);
+}
+
+.autoteste-stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.autoteste-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 5px;
+}
+
+.stat-ok .autoteste-stat-value {
+    color: #16a34a;
+}
+
+.stat-warning .autoteste-stat-value {
+    color: #d97706;
+}
+
+.stat-error .autoteste-stat-value {
+    color: #ef4444;
+}
+
+.stat-info .autoteste-stat-value {
+    color: #3b82f6;
+}
+
+.autoteste-filters {
+    display: none;
+}
+
+.btn-filter {
+    padding: 8px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    background: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-muted);
+}
+
+.btn-filter.active {
+    background: var(--primary-light);
+    color: var(--primary-color);
+    border-color: rgba(79, 70, 229, 0.3);
+}
+
+.autoteste-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.autoteste-item {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-left: 5px solid #cbd5e1;
+    border-radius: var(--radius-sm);
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.autoteste-item.status-ok {
+    border-left-color: #10b981;
+}
+
+.autoteste-item.status-warning {
+    border-left-color: #f59e0b;
+}
+
+.autoteste-item.status-error {
+    border-left-color: #ef4444;
+}
+
+.autoteste-item.status-info {
+    border-left-color: #3b82f6;
+}
+
+.autoteste-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.autoteste-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.autoteste-tag {
+    font-size: 0.7rem;
+    background: #e2e8f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.autoteste-message {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.autoteste-details {
+    background: #f8fafc;
+    border: 1px dashed var(--border-color);
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.autoteste-detail-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.autoteste-formula {
+    grid-column: 1 / -1;
+    font-family: 'Consolas', 'Monaco', monospace;
+    background: #1e293b;
+    color: #cbd5e1;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-top: 5px;
+    overflow-x: auto;
 }

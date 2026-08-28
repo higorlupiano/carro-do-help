@@ -456,6 +456,28 @@
                             </svg>
                             TXT
                         </button>
+                        <button class="btn btn-export" id="exportDanfeBtn"
+                            style="background-color: var(--primary-color); color: white; border: none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <line x1="7" y1="8" x2="17" y2="8" />
+                                <line x1="7" y1="12" x2="17" y2="12" />
+                                <line x1="7" y1="16" x2="13" y2="16" />
+                            </svg>
+                            GERAR DANFE
+                        </button>
+                        <button class="btn btn-export" id="fixGTribRegularBtn"
+                            style="background-color: #ff9800; color: white; border: none; display: none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 9.01l-9.15 9.16a2 2 0 0 1-2.83-2.83l9.16-9.15a6 6 0 0 1 9.01-7.94l-3.77 3.77z" />
+                            </svg>
+                            Corrigir Trib. Regular
+                        </button>
                     </div>
                 </div>
 
@@ -465,6 +487,27 @@
                         <thead id="tableHead" style="position: sticky; top: 0; z-index: 1;"></thead>
                         <tbody id="tableBody"></tbody>
                     </table>
+                </div>
+
+                <!-- Autoteste Container -->
+                <div class="autoteste-container" id="autotesteContainer">
+                    <div class="page-title-section" style="margin-bottom: 0;">
+                        <h2 style="font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" style="color:var(--primary-color);">
+                                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                                <path d="m9 12 2 2 4-4" />
+                            </svg>
+                            Resultados do Autoteste
+                        </h2>
+                        <p style="margin-bottom: 0; font-size: 0.9rem;">Análise matemática e matemática-fiscal
+                            automática baseada nos dados disponíveis no XML.</p>
+                    </div>
+
+                    <div class="autoteste-summary-grid" id="autotesteSummary"></div>
+
+                    <div class="autoteste-list" id="autotesteList"></div>
                 </div>
 
             </div>
@@ -614,6 +657,22 @@
                         <polyline points="9 18 15 12 9 6" />
                     </svg>
                 </button>
+                <div class="sidebar-divider"></div>
+                <button class="sidebar-btn" id="btnViewAutoteste" disabled
+                    style="background: var(--primary-light); border-color: var(--primary-color);">
+                    <span class="sb-icon" style="background: var(--primary-color);"><svg
+                            xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg></span>
+                    <span style="font-weight: 700; color: var(--primary-color);">Autoteste do XML</span>
+                    <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                        viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                </button>
             </div>
         </div>
     </main>
@@ -643,7 +702,8 @@
             'ncm': document.getElementById('btnViewNcm'),
             'cfop': document.getElementById('btnViewCfop'),
             'cst': document.getElementById('btnViewCst'),
-            'cClassTrib': document.getElementById('btnViewCClassTrib')
+            'cClassTrib': document.getElementById('btnViewCClassTrib'),
+            'autoteste': document.getElementById('btnViewAutoteste')
         };
 
         // Estado Global
@@ -667,7 +727,7 @@
         };
         const getVal = (node, tag) => {
             if (!node) return '';
-            const t = node.getElementsByTagName(tag)[0];
+            const t = node.querySelector(tag);
             return t && t.textContent ? t.textContent.trim() : '';
         };
 
@@ -759,10 +819,13 @@
         // PARSER DO XML
         // =========================================================
         function processXmlContent(xmlString, fileName, isNew) {
+            window.currentRawXmlString = xmlString;
             try {
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(xmlString, "application/xml");
-                if (xmlDoc.getElementsByTagName("parsererror").length > 0) throw new Error("Erro na formatação do XML.");
+                if (!xmlDoc.querySelector('infNFe > ide')) {
+                    throw new Error("XML não é uma NF-e válida (Faltam tags 'infNFe' ou 'ide').");
+                }
 
                 // Parsing Genérico
                 const infNFe = xmlDoc.getElementsByTagName('infNFe')[0];
@@ -960,6 +1023,26 @@
                     saveToHistory(fileName, xmlString, currentXmlData.chave);
                 }
 
+                // Autoteste automático após parsing
+                if (typeof runAutoteste === 'function') {
+                    runAutoteste(xmlDoc, currentXmlData);
+                }
+
+                // Verifica se precisa mostrar o botão de correção (CST 550 sem gTribRegular)
+                let needsFix = false;
+                const bsDets = xmlDoc.querySelectorAll('infNFe > det');
+                bsDets.forEach(det => {
+                    const cstIbsCbs = det.querySelector('IBSCBS > CST');
+                    const gTribReg = det.querySelector('IBSCBS > gIBSCBS > gTribRegular');
+                    if (cstIbsCbs && cstIbsCbs.textContent === '550' && !gTribReg) {
+                        needsFix = true;
+                    }
+                });
+                const fixBtn = document.getElementById('fixGTribRegularBtn');
+                if (fixBtn) {
+                    fixBtn.style.display = needsFix ? 'inline-flex' : 'none';
+                }
+
                 // UI Update
                 updateKPIs();
                 enableUI();
@@ -1088,6 +1171,22 @@
                 if (tableRowsData.length === 0) {
                     tableRowsData.push({ rowData: ['-', 'Nenhuma divergência encontrada.', '-', '-', '<span class="badge badge-success">OK</span>'], searchStr: '' });
                 }
+            } else if (viewId === 'autoteste') {
+                // UI Toggle handling is managed outside this block (at the top or bottom of renderView)
+                // However we will not populate tableHead or tableBody here.
+            }
+
+            // Alternar view blocks
+            if (viewId === 'autoteste') {
+                document.getElementById('toolbar').style.display = 'none';
+                document.getElementById('tableContainer').style.display = 'none';
+                document.getElementById('autotesteContainer').style.display = 'flex';
+                renderAutotesteResults();
+                return; // Pula a lógica da tabela
+            } else {
+                document.getElementById('toolbar').style.display = 'flex';
+                document.getElementById('tableContainer').style.display = 'block';
+                document.getElementById('autotesteContainer').style.display = 'none';
             }
 
             tableHead.innerHTML = hHTML;
@@ -1335,6 +1434,183 @@
             doc.save(`nfe_${currentView}.pdf`);
         });
 
+        document.getElementById('exportDanfeBtn').addEventListener('click', () => {
+            if (!window.currentRawXmlString) {
+                alert("Nenhum XML carregado.");
+                return;
+            }
+            localStorage.setItem('danfe_xml_temp', window.currentRawXmlString);
+            window.open('danfe.html', '_blank');
+        });
+
+        document.getElementById('fixGTribRegularBtn').addEventListener('click', () => {
+            if (!window.currentRawXmlString) return;
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(window.currentRawXmlString, "application/xml");
+                const dets = xmlDoc.querySelectorAll('infNFe > det');
+                let totalIbsUfDeducted = 0;
+                let totalIbsMunDeducted = 0;
+                let totalCbsDeducted = 0;
+                let totalIbsDeducted = 0;
+
+                dets.forEach(det => {
+                    const ibscbs = det.querySelector('IBSCBS');
+                    if (!ibscbs) return;
+                    const cst = ibscbs.querySelector('CST');
+                    if (!cst || cst.textContent !== '550') return;
+
+                    const gIbscbs = ibscbs.querySelector('gIBSCBS');
+                    if (!gIbscbs) return;
+
+                    const hasTribReg = gIbscbs.querySelector('gTribRegular');
+                    if (hasTribReg) return; // Ja tem, ignora
+
+                    // Pegar os valores de IBS/CBS originais
+                    const gIbsUF = gIbscbs.querySelector('gIBSUF');
+                    const gIbsMun = gIbscbs.querySelector('gIBSMun');
+                    const gCbs = gIbscbs.querySelector('gCBS');
+
+                    let vIbsUf = 0, pIbsUf = 0;
+                    if (gIbsUF) {
+                        const vNode = gIbsUF.querySelector('vIBSUF');
+                        const pNode = gIbsUF.querySelector('pIBSUF');
+                        vIbsUf = parseFloat(vNode?.textContent || 0);
+                        pIbsUf = parseFloat(pNode?.textContent || 0);
+                        if (vNode) vNode.textContent = "0.00";
+                        if (pNode) pNode.textContent = "0.00";
+                    }
+
+                    let vIbsMun = 0, pIbsMun = 0;
+                    if (gIbsMun) {
+                        const vNode = gIbsMun.querySelector('vIBSMun');
+                        const pNode = gIbsMun.querySelector('pIBSMun');
+                        vIbsMun = parseFloat(vNode?.textContent || 0);
+                        pIbsMun = parseFloat(pNode?.textContent || 0);
+                        if (vNode) vNode.textContent = "0.00";
+                        if (pNode) pNode.textContent = "0.00";
+                    }
+
+                    let vIbs = 0;
+                    const vIbsNode = gIbscbs.querySelector('vIBS');
+                    if (vIbsNode) {
+                        vIbs = parseFloat(vIbsNode.textContent || 0);
+                        vIbsNode.textContent = "0.00";
+                    }
+
+                    let vCbs = 0, pCbs = 0;
+                    if (gCbs) {
+                        const vNode = gCbs.querySelector('vCBS');
+                        const pNode = gCbs.querySelector('pCBS');
+                        vCbs = parseFloat(vNode?.textContent || 0);
+                        pCbs = parseFloat(pNode?.textContent || 0);
+                        if (vNode) vNode.textContent = "0.00";
+                        if (pNode) pNode.textContent = "0.00";
+                    }
+
+                    // Acumuladores globais para deduzir depois
+                    totalIbsUfDeducted += vIbsUf;
+                    totalIbsMunDeducted += vIbsMun;
+                    totalCbsDeducted += vCbs;
+                    totalIbsDeducted += vIbs;
+
+                    // Criar tag gTribRegular com o namespace correto
+                    const ns = ibscbs.namespaceURI;
+                    const createEl = (tag) => ns ? xmlDoc.createElementNS(ns, tag) : xmlDoc.createElement(tag);
+
+                    const gTribReg = createEl('gTribRegular');
+
+                    const cstReg = createEl('CSTReg');
+                    cstReg.textContent = '550';
+                    gTribReg.appendChild(cstReg);
+
+                    const cClassTrib = ibscbs.querySelector('cClassTrib');
+                    if (cClassTrib) {
+                        const cClassTribReg = createEl('cClassTribReg');
+                        cClassTribReg.textContent = cClassTrib.textContent;
+                        gTribReg.appendChild(cClassTribReg);
+                    }
+
+                    // Criar os sub-elementos com formatacao de decimais
+                    const pAliqIbsUf = createEl('pAliqEfetRegIBSUF');
+                    pAliqIbsUf.textContent = pIbsUf.toFixed(2);
+                    gTribReg.appendChild(pAliqIbsUf);
+
+                    const vTribIbsUf = createEl('vTribRegIBSUF');
+                    vTribIbsUf.textContent = vIbsUf.toFixed(2);
+                    gTribReg.appendChild(vTribIbsUf);
+
+                    const pAliqIbsMun = createEl('pAliqEfetRegIBSMun');
+                    pAliqIbsMun.textContent = pIbsMun.toFixed(2);
+                    gTribReg.appendChild(pAliqIbsMun);
+
+                    const vTribIbsMun = createEl('vTribRegIBSMun');
+                    vTribIbsMun.textContent = vIbsMun.toFixed(2);
+                    gTribReg.appendChild(vTribIbsMun);
+
+                    const pAliqCbs = createEl('pAliqEfetRegCBS');
+                    pAliqCbs.textContent = pCbs.toFixed(2);
+                    gTribReg.appendChild(pAliqCbs);
+
+                    const vTribCbs = createEl('vTribRegCBS');
+                    vTribCbs.textContent = vCbs.toFixed(2);
+                    gTribReg.appendChild(vTribCbs);
+
+                    gIbscbs.appendChild(gTribReg);
+                });
+
+                // Deduzir dos totais IBSCBSTot
+                const ibscbsTot = xmlDoc.querySelector('total > IBSCBSTot');
+                if (ibscbsTot) {
+                    const deductNodeValue = (parentNode, tagName, deductedVal) => {
+                        if (!parentNode) return;
+                        const el = parentNode.querySelector(tagName);
+                        if (el) {
+                            let curr = parseFloat(el.textContent || 0);
+                            let newVal = Math.max(0, curr - deductedVal);
+                            el.textContent = newVal.toFixed(2);
+                        }
+                    };
+                    const gIbsTot = ibscbsTot.querySelector('gIBS');
+                    const gCbsTot = ibscbsTot.querySelector('gCBS');
+
+                    if (gIbsTot) {
+                        const gIbsUfTot = gIbsTot.querySelector('gIBSUF');
+                        const gIbsMunTot = gIbsTot.querySelector('gIBSMun');
+                        deductNodeValue(gIbsUfTot, 'vIBSUF', totalIbsUfDeducted);
+                        deductNodeValue(gIbsMunTot, 'vIBSMun', totalIbsMunDeducted);
+                        deductNodeValue(gIbsTot, 'vIBS', totalIbsDeducted);
+                    }
+                    if (gCbsTot) {
+                        deductNodeValue(gCbsTot, 'vCBS', totalCbsDeducted);
+                    }
+                }
+
+                // Serializar e baixar
+                const serializer = new XMLSerializer();
+                let newXmlString = serializer.serializeToString(xmlDoc);
+                // Ajustar encoding pq serializeToString as vezes tira
+                if (!newXmlString.startsWith('<?xml')) {
+                    newXmlString = '<?xml version="1.0" encoding="UTF-8"?>\n' + newXmlString;
+                }
+
+                // Pega nome do arquivo do histórico
+                let nfeId = xmlDoc.querySelector('infNFe')?.getAttribute('Id') || 'Desconhecido';
+                nfeId = nfeId.replace('NFe', '');
+
+                const blob = new Blob([newXmlString], { type: 'text/xml;charset=utf-8' });
+                saveFileBlob(blob, `NFe_${nfeId}_Corrigida.xml`);
+
+                // Reprocessa no app para sumir o botao e mostrar corrigido
+                processXmlContent(newXmlString, `NFe_${nfeId}_Corrigida.xml`, false);
+                alert('Correção aplicada com sucesso! O download foi iniciado e o XML foi recarregado no sistema.');
+
+            } catch (err) {
+                console.error(err);
+                alert('Erro ao corrigir o XML: ' + err.message);
+            }
+        });
+
         function saveFileBlob(blob, filename) {
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
@@ -1512,6 +1788,351 @@
                 });
             }
         });
+
+        // =========================================================
+        // MOTOR DE AUTOTESTE (TESTES FISCAIS / MATEMÁTICOS)
+        // =========================================================
+        let autotesteResults = [];
+
+        function runAutoteste(xmlDoc, data) {
+            autotesteResults = [];
+            const eps = 0.05; // Tolerância de arredondamento
+
+            function addTest(origin, category, title, declared, calculated, formula, opts = {}) {
+                let diff = Math.abs(declared - calculated);
+                let status = 'status-ok';
+                let msg = 'Valor calculado bate com o valor informado.';
+
+                if (diff > eps) {
+                    status = 'status-error';
+                    msg = `Valor matematicamente incompatível (Diferença: R$ ${diff.toFixed(2)})`;
+                } else if (diff > 0.005 && diff <= eps) {
+                    status = 'status-warning';
+                    msg = `Pequena diferença de arredondamento aceitável (Diferença: R$ ${diff.toFixed(2)})`;
+                }
+
+                if (opts.infoOnly) {
+                    status = 'status-info';
+                    msg = opts.msg || 'Informação extraída do XML.';
+                } else if (opts.forceWarning) {
+                    status = 'status-warning';
+                    msg = opts.msg || 'Atenção necessária.';
+                }
+
+                autotesteResults.push({
+                    id: Math.random().toString(36).substr(2, 9),
+                    origin: origin, // Ex: "Item #1", "Totais da NF-e"
+                    category: category,
+                    title: title,
+                    declared: parseFloat(declared) || 0,
+                    calculated: parseFloat(calculated) || 0,
+                    formula: formula,
+                    status: status,
+                    msg: msg
+                });
+            }
+
+            try {
+                // 1. Validar Itens
+                const dets = xmlDoc.querySelectorAll('infNFe > det');
+
+                let sumTotProd = 0, sumTotFrete = 0, sumTotSeg = 0, sumTotDesc = 0, sumTotOutro = 0;
+                let sumTotIcms = 0, sumTotIpi = 0, sumTotPis = 0, sumTotCofins = 0;
+
+                dets.forEach(det => {
+                    const pos = det.getAttribute('nItem');
+                    const origin = `Item #${pos}`;
+                    const prod = det.querySelector('prod');
+                    const imposto = det.querySelector('imposto');
+
+                    const qCom = parseFloat(getVal(prod, 'qCom')) || 0;
+                    const vUnCom = parseFloat(getVal(prod, 'vUnCom')) || 0;
+                    const vProd = parseFloat(getVal(prod, 'vProd')) || 0;
+
+                    const vDesc = parseFloat(getVal(prod, 'vDesc')) || 0;
+                    const vFrete = parseFloat(getVal(prod, 'vFrete')) || 0;
+                    const vSeg = parseFloat(getVal(prod, 'vSeg')) || 0;
+                    const vOutro = parseFloat(getVal(prod, 'vOutro')) || 0;
+
+                    sumTotProd += vProd;
+                    sumTotFrete += vFrete;
+                    sumTotSeg += vSeg;
+                    sumTotDesc += vDesc;
+                    sumTotOutro += vOutro;
+
+                    // vProd Test
+                    let calcVProd = qCom * vUnCom;
+                    addTest(origin, 'Geral', `Valor Bruto do Produto (vProd)`, vProd, calcVProd, `qCom (${qCom.toFixed(4)}) × vUnCom (${vUnCom.toFixed(4)}) = ${calcVProd.toFixed(2)}`);
+
+                    // Impostos
+                    if (imposto) {
+                        const icmsNode = imposto.querySelector('ICMS');
+                        if (icmsNode && icmsNode.children[0]) {
+                            const icmsChild = icmsNode.children[0];
+                            const pICMS = parseFloat(getVal(icmsChild, 'pICMS')) || 0;
+                            const vBC = parseFloat(getVal(icmsChild, 'vBC')) || 0;
+                            const vICMS = parseFloat(getVal(icmsChild, 'vICMS')) || 0;
+
+                            if (pICMS > 0 && vBC > 0) {
+                                let calcIcms = vBC * (pICMS / 100);
+                                sumTotIcms += vICMS;
+
+                                // Test ICMS Calculation
+                                addTest(origin, 'ICMS', `Cálculo de ICMS`, vICMS, calcIcms, `vBC (${vBC.toFixed(2)}) × pICMS (${pICMS}%) = ${calcIcms.toFixed(2)}`);
+
+                                // Test BC Composition if applicable. Normal: vProd + frete + seg + outro - desc + IPI (sometimes)
+                                const vIPI = parseFloat(getVal(imposto.querySelector('IPI'), 'vIPI')) || 0;
+                                let expectedBcSemIpi = vProd + vFrete + vSeg + vOutro - vDesc;
+                                let expectedBcComIpi = expectedBcSemIpi + vIPI;
+
+                                let bcDiffComIpi = Math.abs(vBC - expectedBcComIpi);
+                                let bcDiffSemIpi = Math.abs(vBC - expectedBcSemIpi);
+
+                                const pRedBC = parseFloat(getVal(icmsChild, 'pRedBC')) || 0;
+                                let expectedBcReducao = expectedBcSemIpi * (1 - (pRedBC / 100));
+                                let expectedStr = `vProd (${vProd}) + Frete (${vFrete}) + Seg (${vSeg}) + Outro (${vOutro}) - Desc (${vDesc})`;
+
+                                if (pRedBC > 0 && Math.abs(vBC - expectedBcReducao) <= eps) {
+                                    addTest(origin, 'ICMS', `Composição de BC ICMS (Redução pRedBC)`, vBC, expectedBcReducao, `(${expectedStr}) × (1 - ${pRedBC}%)`);
+                                } else if (bcDiffSemIpi <= eps) {
+                                    addTest(origin, 'ICMS', `Composição de BC ICMS (Mínima)`, vBC, expectedBcSemIpi, expectedStr);
+                                } else if (bcDiffComIpi <= eps) {
+                                    addTest(origin, 'ICMS', `Composição de BC ICMS (Incluso IPI)`, vBC, expectedBcComIpi, `${expectedStr} + vIPI (${vIPI})`);
+                                } else {
+                                    // Test por dentro
+                                    let bcPorDentro = expectedBcSemIpi / (1 - (pICMS / 100));
+                                    if (Math.abs(vBC - bcPorDentro) <= eps) {
+                                        addTest(origin, 'ICMS', `Composição de BC ICMS (Por Dentro)`, vBC, bcPorDentro, `(${expectedStr}) / (1 - ${pICMS / 100})`);
+                                    } else {
+                                        // Não foi possível identificar
+                                        let bMsg = pRedBC > 0 ? `Redução informada (${pRedBC}%), porém não bate com vBC.` : 'A BC informada não bate com as fórmulas padrão.';
+                                        addTest(origin, 'ICMS', `Composição de BC ICMS (Indeterminada)`, vBC, vBC, `Valores operacionais sugerem ${expectedBcSemIpi.toFixed(2)}, vBC informada é ${vBC.toFixed(2)}.`, { forceWarning: true, msg: bMsg });
+                                    }
+                                }
+                            }
+
+                            // Validação Complementar MVA
+                            const vBCST = parseFloat(getVal(icmsChild, 'vBCST')) || 0;
+                            const pMVAST = parseFloat(getVal(icmsChild, 'pMVAST')) || 0;
+                            const pRedBCST = parseFloat(getVal(icmsChild, 'pRedBCST')) || 0;
+
+                            if (vBCST > 0 && pMVAST > 0) {
+                                const vIPI = parseFloat(getVal(imposto.querySelector('IPI'), 'vIPI')) || 0;
+                                let expectedBcSemIpi_ST = vProd + vFrete + vSeg + vOutro - vDesc;
+                                let baseSt = (expectedBcSemIpi_ST + vIPI) * (1 + (pMVAST / 100)) * (1 - (pRedBCST / 100));
+
+                                if (Math.abs(vBCST - baseSt) <= eps) {
+                                    addTest(origin, 'ICMS ST', `Composição de BC ST (MVA)`, vBCST, baseSt, `((BC Mínima + vIPI) × (1 + MVA ${pMVAST}%)) × (1 - pRedBCST ${pRedBCST}%)`);
+                                } else {
+                                    if (Math.abs(vBCST - baseSt) > 0.005) {
+                                        addTest(origin, 'ICMS ST', `Composição de BC ST (Indeterminada)`, vBCST, baseSt, `Dependente da origem ou Por Dentro.`, { forceWarning: true, msg: `Cálculo via MVA Padrão totaliza R$ ${baseSt.toFixed(2)}.` });
+                                    }
+                                }
+                            }
+                        }
+
+                        // IPI
+                        const ipiNode = imposto.querySelector('IPI');
+                        if (ipiNode) {
+                            const pIPI = parseFloat(getVal(ipiNode, 'pIPI')) || 0;
+                            const vBCIPI = parseFloat(getVal(ipiNode, 'vBC')) || 0;
+                            const vIPI = parseFloat(getVal(ipiNode, 'vIPI')) || 0;
+                            if (pIPI > 0 && vBCIPI > 0) {
+                                sumTotIpi += vIPI;
+                                addTest(origin, 'IPI', 'Cálculo de IPI', vIPI, vBCIPI * (pIPI / 100), `vBC IPI (${vBCIPI.toFixed(2)}) × pIPI (${pIPI}%)`);
+                            }
+                        }
+
+                        // PIS
+                        const pisNode = imposto.querySelector('PIS');
+                        if (pisNode) {
+                            const pPIS = parseFloat(getVal(pisNode, 'pPIS')) || 0;
+                            const vBCPIS = parseFloat(getVal(pisNode, 'vBC')) || 0;
+                            const vPIS = parseFloat(getVal(pisNode, 'vPIS')) || 0;
+                            if (pPIS > 0 && vBCPIS > 0) {
+                                sumTotPis += vPIS;
+                                addTest(origin, 'PIS', 'Cálculo de PIS', vPIS, vBCPIS * (pPIS / 100), `vBC PIS (${vBCPIS.toFixed(2)}) × pPIS (${pPIS}%)`);
+                            }
+                        }
+
+                        // COFINS
+                        const cofinsNode = imposto.querySelector('COFINS');
+                        if (cofinsNode) {
+                            const pCOFINS = parseFloat(getVal(cofinsNode, 'pCOFINS')) || 0;
+                            const vBCCOFINS = parseFloat(getVal(cofinsNode, 'vBC')) || 0;
+                            const vCOFINS = parseFloat(getVal(cofinsNode, 'vCOFINS')) || 0;
+                            if (pCOFINS > 0 && vBCCOFINS > 0) {
+                                sumTotCofins += vCOFINS;
+                                addTest(origin, 'COFINS', 'Cálculo de COFINS', vCOFINS, vBCCOFINS * (pCOFINS / 100), `vBC COFINS (${vBCCOFINS.toFixed(2)}) × pCOFINS (${pCOFINS}%)`);
+                            }
+                        }
+
+                        // IBS / CBS
+                        const ibscbsNode = imposto.querySelector('IBSCBS');
+                        if (ibscbsNode) {
+                            const gIBSCBS = ibscbsNode.querySelector('gIBSCBS');
+                            if (gIBSCBS) {
+                                const vBC = parseFloat(getVal(gIBSCBS, 'vBC')) || 0;
+
+                                // Extração IBS
+                                const gIBSUF = gIBSCBS.querySelector('gIBSUF');
+                                let pIBS = parseFloat(getVal(gIBSUF, 'pIBSUF')) || parseFloat(getVal(gIBSCBS, 'pIBS')) || 0;
+                                const vIBS = parseFloat(getVal(gIBSCBS, 'vIBS')) || parseFloat(getVal(gIBSUF, 'vIBSUF')) || 0;
+
+                                // Verifica Redução IBS
+                                if (gIBSUF && gIBSUF.querySelector('gRed')) {
+                                    const pAliqEfetIBS = parseFloat(getVal(gIBSUF.querySelector('gRed'), 'pAliqEfet'));
+                                    if (!isNaN(pAliqEfetIBS)) pIBS = pAliqEfetIBS;
+                                }
+
+                                // Extração CBS
+                                const gCBS = gIBSCBS.querySelector('gCBS');
+                                let pCBS = parseFloat(getVal(gCBS, 'pCBS')) || 0;
+                                const vCBS = parseFloat(getVal(gCBS, 'vCBS')) || 0;
+
+                                // Verifica Redução CBS
+                                if (gCBS && gCBS.querySelector('gRed')) {
+                                    const pAliqEfetCBS = parseFloat(getVal(gCBS.querySelector('gRed'), 'pAliqEfet'));
+                                    if (!isNaN(pAliqEfetCBS)) pCBS = pAliqEfetCBS;
+                                }
+
+                                if (vBC > 0) {
+                                    if (pIBS > 0) {
+                                        addTest(origin, 'IBS', 'Cálculo de IBS', vIBS, vBC * (pIBS / 100), `vBC (${vBC.toFixed(2)}) × pIBS (${pIBS.toFixed(2)}%)`);
+                                    }
+                                    if (pCBS > 0) {
+                                        addTest(origin, 'CBS', 'Cálculo de CBS', vCBS, vBC * (pCBS / 100), `vBC (${vBC.toFixed(2)}) × pCBS (${pCBS.toFixed(2)}%)`);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // 2. Validar Totais Globais
+                if (data.totData) {
+                    const t = data.totData;
+                    const origin = 'Totais da NF-e';
+
+                    const decVProd = parseFloat(t.vProd) || 0;
+                    addTest(origin, 'Totais Globais', 'Somatório Total Produtos (vProd)', decVProd, sumTotProd, `Σ (vProd itens) = ${sumTotProd.toFixed(2)}`);
+
+                    const decVFrete = parseFloat(t.vFrete) || 0;
+                    addTest(origin, 'Totais Globais', 'Somatório de Frete (vFrete)', decVFrete, sumTotFrete, `Σ (vFrete itens) = ${sumTotFrete.toFixed(2)}`);
+
+                    const decVDesc = parseFloat(t.vDesc) || 0;
+                    addTest(origin, 'Totais Globais', 'Somatório de Descontos (vDesc)', decVDesc, sumTotDesc, `Σ (vDesc itens) = ${sumTotDesc.toFixed(2)}`);
+
+                    // Somatorios de impostos
+                    if (sumTotIcms > 0) addTest(origin, 'Totais Globais', 'Somatório vICMS', parseFloat(t.vICMS) || 0, sumTotIcms, `Σ (vICMS itens)`);
+                    if (sumTotIpi > 0) addTest(origin, 'Totais Globais', 'Somatório vIPI', parseFloat(t.vIPI) || 0, sumTotIpi, `Σ (vIPI itens)`);
+                    if (sumTotPis > 0) addTest(origin, 'Totais Globais', 'Somatório vPIS', parseFloat(t.vPIS) || 0, sumTotPis, `Σ (vPIS itens)`);
+                    if (sumTotCofins > 0) addTest(origin, 'Totais Globais', 'Somatório vCOFINS', parseFloat(t.vCOFINS) || 0, sumTotCofins, `Σ (vCOFINS itens)`);
+
+                    // Validação de cálculo total da nota
+                    // vNF = vProd - vDesc - vICMSDeson + vST + vFrete + vSeg + vOutro + vII + vIPI + vServ + (alguns dependendo da operacao)
+                    // Faremos uma estimativa genérica, não é tao simples bater vNF sem saber a exata composição de ST/IPI se estão inclusos etc
+                    // Se quisermos ser rigorosos precisamos seguir estritamente o manual. Mostraremos as somas ao inves.
+                }
+
+            } catch (e) {
+                console.error("Erro ao rodar Autoteste:", e);
+                autotesteResults.push({
+                    id: Math.random(), origin: 'Sistema', category: 'Erro', title: 'Erro de Autoteste', declared: 0, calculated: 0, formula: 'N/A', status: 'status-error', msg: `Falha interna: ${e.message}`
+                });
+            }
+        }
+
+        function renderAutotesteResults() {
+            const sumContainer = document.getElementById('autotesteSummary');
+            const listContainer = document.getElementById('autotesteList');
+
+            // Stats
+            const statsObj = { total: autotesteResults.length, ok: 0, warning: 0, error: 0, info: 0 };
+            autotesteResults.forEach(r => {
+                if (r.status === 'status-ok') statsObj.ok++;
+                if (r.status === 'status-warning') statsObj.warning++;
+                if (r.status === 'status-error') statsObj.error++;
+                if (r.status === 'status-info') statsObj.info++;
+            });
+
+            sumContainer.innerHTML = `
+                <div class="autoteste-stat-card active" data-filter="all">
+                    <div class="autoteste-stat-value">${statsObj.total}</div>
+                    <div class="autoteste-stat-label">Testes Feitos</div>
+                </div>
+                <div class="autoteste-stat-card stat-ok" data-filter="status-ok">
+                    <div class="autoteste-stat-value">${statsObj.ok}</div>
+                    <div class="autoteste-stat-label">Corretos (OK)</div>
+                </div>
+                <div class="autoteste-stat-card stat-warning" data-filter="status-warning">
+                    <div class="autoteste-stat-value">${statsObj.warning}</div>
+                    <div class="autoteste-stat-label">Avisos</div>
+                </div>
+                <div class="autoteste-stat-card stat-error" data-filter="status-error">
+                    <div class="autoteste-stat-value">${statsObj.error}</div>
+                    <div class="autoteste-stat-label">Divergências</div>
+                </div>
+            `;
+
+            function drawList(filterStatus) {
+                listContainer.innerHTML = '';
+                let count = 0;
+                autotesteResults.forEach(res => {
+                    if (filterStatus !== 'all' && filterStatus !== res.status) return;
+                    count++;
+
+                    let stBadge = 'OK'; let bdgClass = 'badge-success';
+                    if (res.status === 'status-warning') { stBadge = 'Atenção'; bdgClass = 'badge-warning'; }
+                    if (res.status === 'status-error') { stBadge = 'Divergência'; bdgClass = 'badge-danger'; }
+                    if (res.status === 'status-info') { stBadge = 'Info'; bdgClass = 'badge-info'; }
+
+                    const item = document.createElement('div');
+                    item.className = `autoteste-item ${res.status}`;
+                    item.innerHTML = `
+                        <div class="autoteste-header">
+                            <span class="autoteste-title">
+                                <span class="badge ${bdgClass}">${stBadge}</span>
+                                <span class="autoteste-tag">${res.origin}</span>
+                                <span class="autoteste-tag">${res.category}</span>
+                                ${res.title}
+                            </span>
+                        </div>
+                        <div class="autoteste-message">${res.msg}</div>
+                        <div class="autoteste-details">
+                            <div class="autoteste-detail-col">
+                                <strong>Informado no XML</strong>
+                                <span>R$ ${res.declared.toFixed(2)}</span>
+                            </div>
+                            <div class="autoteste-detail-col">
+                                <strong>Calculado (Fórmula)</strong>
+                                <span>R$ ${res.calculated.toFixed(2)}</span>
+                            </div>
+                            <div class="autoteste-detail-col">
+                                <strong>Diferença Absoluta</strong>
+                                <span>R$ ${Math.abs(res.declared - res.calculated).toFixed(2)}</span>
+                            </div>
+                            <div class="autoteste-formula">Fórmula: ${res.formula}</div>
+                        </div>
+                    `;
+                    listContainer.appendChild(item);
+                });
+
+                if (count === 0) listContainer.innerHTML = '<p style="color:var(--text-muted);text-align:center;">Nenhum teste corresponde a este filtro.</p>';
+            }
+
+            // Click eventos nos filtros (Cards)
+            const statCards = sumContainer.querySelectorAll('.autoteste-stat-card');
+            statCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    statCards.forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    drawList(card.getAttribute('data-filter'));
+                });
+            });
+
+            drawList('all'); // Inicial
+        }
 
         // Init
         loadHistory();

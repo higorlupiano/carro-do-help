@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DANFe - Documento Auxiliar da Nota Fiscal Eletrônica</title>
+    <link rel="stylesheet" href="danfe.css">
+    <!-- JsBarcode library from CDN to generate barcode for Chave de Acesso -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+</head>
+
+<body>
+
+    <button onclick="window.print()" class="no-print"
+        style="position:fixed; top:20px; right:20px; padding:10px 20px; cursor:pointer; background:#2A3CF0; color:#fff; border:none; border-radius:4px; font-weight:bold; font-size:14px; box-shadow:0 4px 6px rgba(0,0,0,0.2); z-index:1000;">
+        <svg style="vertical-align: middle; margin-right:5px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+        IMPRIMIR DANFE
+    </button>
+
+    <div class="danfe-page" id="danfePage">
+
+        <!-- Canhoto -->
+        <div class="canhoto">
+            <div class="canhoto-title">
+                RECEBEMOS DE <span id="cnhEmit"></span> OS PRODUTOS/SERVIÇOS CONSTANTES DA NOTA FISCAL INDICADA AO LADO
+            </div>
+            <div class="canhoto-assinatura" style="display:flex; flex-direction:column; justify-content:space-between;">
+                <div style="font-size:7px;">DATA DE RECEBIMENTO</div>
+                <div style="border-top:1px dashed #000; width:90%; font-size:7px; text-align:center; padding-top:2px;">
+                    IDENTIFICAÇÃO E ASSINATURA DO RECEBEDOR</div>
+            </div>
+            <div class="canhoto-nfe">
+                NF-e<br>Nº <span id="cnhNNF"></span><br>SÉRIE <span id="cnhSerie"></span>
+            </div>
+        </div>
+
+        <!-- Cabeçalho -->
+        <div class="header-grid">
+            <div class="h-col h-emitente">
+                <h2 id="dhEmitNome">NOME DO EMITENTE</h2>
+                <p id="dhEmitEnd"></p>
+            </div>
+            <div class="h-col h-danfe">
+                <h3>DANFE</h3>
+                <div style="font-size:8px;">Documento Auxiliar da Nota<br>Fiscal Eletrônica</div>
+                <div
+                    style="text-align:left; font-size:10px; margin-top:5px; width:100%; display:flex; justify-content:space-between; padding:0 5px;">
+                    <div>0 - Entrada<br>1 - Saída</div>
+                    <div class="h-danfe-tp" id="dhTpNF">1</div>
+                </div>
+                <div style="font-size:10px; margin-top:3px;">
+                    <strong>Nº <span id="dhNNF"></span></strong><br>
+                    <strong>Série: <span id="dhSerie"></span></strong><br>
+                    Página 1 de 1
+                </div>
+            </div>
+            <div class="h-col h-barcode">
+                <div style="text-align:center;">Controle do Fisco</div>
+                <svg id="barcode" class="barcode-img"></svg>
+                <div class="h-chave-label">CHAVE DE ACESSO</div>
+                <div class="h-chave-val" id="dhChave"></div>
+                <div style="font-size:8px; text-align:center; margin-top:5px;">
+                    Consulta de autenticidade no portal nacional da NF-e www.nfe.fazenda.gov.br/portal ou no site da
+                    Sefaz Autorizadora.
+                </div>
+            </div>
+        </div>
+
+        <!-- Natureza e Inscrições -->
+        <div class="box">
+            <div class="field-row">
+                <div class="field" style="flex:2;">
+                    <div class="f-label">NATUREZA DA OPERAÇÃO</div>
+                    <div class="f-val" id="natOp"></div>
+                </div>
+                <div class="field" style="flex:1;">
+                    <div class="f-label">PROTOCOLO DE AUTORIZAÇÃO DE USO</div>
+                    <div class="f-val" id="nProt"></div>
+                </div>
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <div class="f-label">INSCRIÇÃO ESTADUAL</div>
+                    <div class="f-val" id="emitIE"></div>
+                </div>
+                <div class="field">
+                    <div class="f-label">INSC. ESTADUAL DO SUBST. TRIB.</div>
+                    <div class="f-val" id="emitIEST"></div>
+                </div>
+                <div class="field">
+                    <div class="f-label">CNPJ</div>
+                    <div class="f-val" id="emitCNPJ"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Destinatario / Remetente -->
+        <div class="box-title">DESTINATÁRIO/REMETENTE</div>
+        <div class="box">
+            <div class="field-row">
+                <div class="field" style="flex:3;">
+                    <div class="f-label">NOME/RAZÃO SOCIAL</div>
+                    <div class="f-val" id="destNome"></div>
+                </div>
+                <div class="field" style="flex:1;">
+                    <div class="f-label">CNPJ/CPF</div>
+                    <div class="f-val" id="destDoc"></div>
+                </div>
+                <div class="field" style="flex:1;">
+                    <div class="f-label">DATA DA EMISSÃO</div>
+                    <div class="f-val" id="dhEmi"></div>
+                </div>
+            </div>
+            <div class="field-row">
+                <div class="field" style="flex:2;">
+                    <div class="f-label">ENDEREÇO</div>
+                    <div class="f-val" id="destEnd"></div>
+                </div>
+                <div class="field" style="flex:1;">
+                    <div class="f-label">BAIRRO/DISTRITO</div>
+                    <div class="f-val" id="destBairro"></div>
+                </div>
+                <div class="field" style="flex:1;">
+                    <div class="f-label">CEP</div>
+                    <div class="f-val" id="destCEP"></div>
+                </div>
+                <div class="field" style="flex:1;">
+                    <div class="f-label">DATA DE SAÍDA/ENTRADA</div>
+                    <div class="f-val" id="dhSaiEnt"></div>
+                </div>
+            </div>
+            <div class="field-row">
+                <div class="field" style="flex:2;">
+                    <div class="f-label">MUNICÍPIO</div>
+                    <div class="f-val" id="destMun"></div>
+                </div>
+                <div class="field" style="flex:0.5;">
+                    <div class="f-label">UF</div>
+                    <div class="f-val" id="destUF"></div>
+                </div>
+                <div class="field" style="flex:1;">
+                    <div class="f-label">FONE/FAX</div>
+                    <div class="f-val" id="destFone"></div>
+                </div>
+                <div class="field" style="flex:1;">
+                    <div class="f-label">INSCRIÇÃO ESTADUAL</div>
+                    <div class="f-val" id="destIE"></div>
+                </div>
+                <div class="field" style="flex:1;">
+                    <div class="f-label">HORA DE SAÍDA</div>
+                    <div class="f-val"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculo do Imposto -->
+        <div class="box-title">CÁLCULO DO IMPOSTO</div>
+        <div class="box">
+            <div class="field-row" style="text-align:right;">
+                <div class="field">
+                    <div class="f-label" style="text-align:left;">BASE DE CÁLCULO DE ICMS</div>
+                    <div class="f-val" id="totVBC"></div>
+                </div>
+                <div class="field">
+                    <div class="f-label" style="text-align:left;">VALOR DO ICMS</div>
+                    <div class="f-val" id="totVICMS"></div>
+                </div>
+                <div class="field">
+                    <div class="f-label" style="text-align:left;">BASE DE CÁLCULO ICMS ST</div>
+                    <div class="f-val" id="totVBCST"></div>
+                </div>
+                <div class="field">
+                    <div class="f-label" style="text-align:left;">VALOR DO ICMS SUBSTITUIÇÃO</div>
+                    <div class="f-val" id="totVST"></div>
+                </div>
+                <div class="field">
+                    <div class="f-label" style="text-align:left;">VALOR TOTAL DOS PRODUTOS</div>
+                    <div class="f-val" id="totVProd"></div>
+                </div>
+            </div>
+            <div class="field-row" style="text-align:right;">
+                <div class="field">
+                    <div class="f-label" style="text-align:left;">VALOR DO FRETE</div>
+                    <div class="f-val" id="totVFrete"></div>
+                </div>
+                <div class="field">
+                    <div class="f-label" style="text-align:left;">VALOR DO SEGURO</div>
+                    <div class="f-val" id="totVSeg"></div>
+                </div>
+                <div class="field">
+                    <div class="f-label" style="text-align:left;">DESCONTO</div>
+                    <div class="f-val" id="totVDesc"></div>
+                </div>
+                <div class="field">
+                    <div class="f-label" style="text-align:left;">OUTRAS DESPESAS ACESSÓRIAS</div>
+                    <div class="f-val" id="totVOutro"></div>
+                </div>
+                <div class="field">
+                    <div class="f-label" style="text-align:left;">VALOR DO IPI</div>
+                    <div class="f-val" id="totVIPI"></div>
+                </div>
+                <div class="field">
+                    <div class="f-label" style="text-align:left;">VALOR TOTAL DA NOTA</div>
+                    <div class="f-val" id="totVNF"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Itens -->
+        <div class="box-title">DADOS DO PRODUTO/SERVIÇO</div>
+        <div class="box" style="min-height: 100mm;">
+            <table class="table-produtos">
+                <thead>
+                    <tr>
+                        <th style="width:10%">CÓDIGO</th>
+                        <th style="width:30%">DESCRIÇÃO DO PRODUTO/SERVIÇO</th>
+                        <th style="width:6%">NCM/SH</th>
+                        <th style="width:3%">CST</th>
+                        <th style="width:4%">CFOP</th>
+                        <th style="width:3%">UNID</th>
+                        <th style="width:5%">QTD.</th>
+                        <th style="width:6%">VLR UNIT</th>
+                        <th style="width:6%">VLR TOTAL</th>
+                        <th style="width:6%">BC ICMS</th>
+                        <th style="width:5%">VLR ICMS</th>
+                        <th style="width:5%">VLR IPI</th>
+                        <th style="width:4%">%ICMS</th>
+                        <th style="width:4%">%IPI</th>
+                    </tr>
+                </thead>
+                <tbody id="listaProdutos">
+                    <!-- Javascript injects table rows here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Dados Adicionais -->
+        <div class="box-title">DADOS ADICIONAIS</div>
+        <div class="box" style="min-height: 25mm;">
+            <div class="field-row" style="height:100%;">
+                <div class="field" style="width:100%; border-right:none;">
+                    <div class="f-label">INFORMAÇÕES COMPLEMENTARES</div>
+                    <div class="f-val" id="infCpl" style="font-weight:normal; font-size:8px;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Engine DANFe (Apenas parser de estrutura visual)
+        document.addEventListener('DOMContentLoaded', () => {
+            const rawXml = localStorage.getItem('danfe_xml_temp');
+            if (!rawXml) {
+                document.getElementById('danfePage').innerHTML = '<h3 style="padding:20px;text-align:center;">Erro: Nenhum XML foi encontrado em cache. Retorne ao sistema, carregue o XML e clique em "Gerar DANFe" novamente.</h3>';
+                return;
+            }
+
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(rawXml, "application/xml");
+
+            const getVal = (node, tag) => {
+                if (!node) return '';
+                const t = node.querySelector(tag);
+                return t && t.textContent ? t.textContent.trim() : '';
+            };
+
+            const formatNum = (v) => {
+                const n = parseFloat(v);
+                return isNaN(n) ? '' : n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            };
+
+            const formatChave = (ch) => {
+                return ch ? ch.replace(/(\d{4})/g, '$1 ') : '';
+            };
+
+            const infNFe = xmlDoc.querySelector('infNFe');
+            const ide = xmlDoc.querySelector('ide');
+            const emit = xmlDoc.querySelector('emit');
+            const dest = xmlDoc.querySelector('dest');
+            const icmsTot = xmlDoc.querySelector('ICMSTot');
+            const infAdic = xmlDoc.querySelector('infAdic');
+            const prot = xmlDoc.querySelector('protNFe');
+
+            if (!infNFe || !ide) {
+                document.getElementById('danfePage').innerHTML = '<h3 style="padding:20px;">XML Inválido para DANFe.</h3>';
+                return;
+            }
+
+            const chaveDesformatada = infNFe.getAttribute('Id') ? infNFe.getAttribute('Id').replace('NFe', '') : '';
+            const chaveAcesso = formatChave(chaveDesformatada);
+
+            // Popula Emitente
+            const emitNome = getVal(emit, 'xNome');
+            const enderEmit = emit ? emit.querySelector('enderEmit') : null;
+            document.getElementById('cnhEmit').textContent = emitNome;
+            document.getElementById('dhEmitNome').textContent = emitNome;
+
+            if (enderEmit) {
+                const end = [
+                    getVal(enderEmit, 'xLgr'),
+                    getVal(enderEmit, 'nro'),
+                    getVal(enderEmit, 'xCpl'),
+                    getVal(enderEmit, 'xBairro'),
+                    getVal(enderEmit, 'xMun') + ' - ' + getVal(enderEmit, 'UF'),
+                    'CEP: ' + getVal(enderEmit, 'CEP')
+                ].filter(Boolean).join(', ');
+                document.getElementById('dhEmitEnd').textContent = end;
+            }
+
+            // Identificação 
+            document.getElementById('cnhNNF').textContent = getVal(ide, 'nNF');
+            document.getElementById('cnhSerie').textContent = getVal(ide, 'serie');
+            document.getElementById('dhNNF').textContent = getVal(ide, 'nNF');
+            document.getElementById('dhSerie').textContent = getVal(ide, 'serie');
+            document.getElementById('dhTpNF').textContent = getVal(ide, 'tpNF');
+
+            document.getElementById('natOp').textContent = getVal(ide, 'natOp');
+            document.getElementById('dhChave').textContent = chaveAcesso;
+
+            // Barcode
+            if (chaveDesformatada && typeof JsBarcode !== 'undefined') {
+                JsBarcode("#barcode", chaveDesformatada, {
+                    format: "CODE128C",
+                    displayValue: false,
+                    margin: 0,
+                    width: 1.5,
+                    height: 40
+                });
+            }
+
+            if (prot) {
+                document.getElementById('nProt').textContent = getVal(prot, 'nProt') + ' - ' + new Date(getVal(prot, 'dhRecbto')).toLocaleString('pt-BR');
+            }
+
+            document.getElementById('emitIE').textContent = getVal(emit, 'IE');
+            document.getElementById('emitIEST').textContent = getVal(emit, 'IEST');
+            document.getElementById('emitCNPJ').textContent = getVal(emit, 'CNPJ') || getVal(emit, 'CPF');
+
+            // Destinatário
+            document.getElementById('destNome').textContent = getVal(dest, 'xNome');
+            document.getElementById('destDoc').textContent = getVal(dest, 'CNPJ') || getVal(dest, 'CPF');
+
+            const dp = getVal(ide, 'dhEmi');
+            document.getElementById('dhEmi').textContent = dp ? new Date(dp).toLocaleDateString('pt-BR') : '';
+
+            const ds = getVal(ide, 'dhSaiEnt');
+            document.getElementById('dhSaiEnt').textContent = ds ? new Date(ds).toLocaleDateString('pt-BR') : '';
+
+            const enderDest = dest ? dest.querySelector('enderDest') : null;
+            if (enderDest) {
+                document.getElementById('destEnd').textContent = [getVal(enderDest, 'xLgr'), getVal(enderDest, 'nro'), getVal(enderDest, 'xCpl')].filter(Boolean).join(', ');
+                document.getElementById('destBairro').textContent = getVal(enderDest, 'xBairro');
+                document.getElementById('destCEP').textContent = getVal(enderDest, 'CEP');
+                document.getElementById('destMun').textContent = getVal(enderDest, 'xMun');
+                document.getElementById('destUF').textContent = getVal(enderDest, 'UF');
+                document.getElementById('destFone').textContent = getVal(enderDest, 'fone');
+                document.getElementById('destIE').textContent = getVal(dest, 'IE');
+            }
+
+            // Totais
+            if (icmsTot) {
+                document.getElementById('totVBC').textContent = formatNum(getVal(icmsTot, 'vBC'));
+                document.getElementById('totVICMS').textContent = formatNum(getVal(icmsTot, 'vICMS'));
+                document.getElementById('totVBCST').textContent = formatNum(getVal(icmsTot, 'vBCST'));
+                document.getElementById('totVST').textContent = formatNum(getVal(icmsTot, 'vST'));
+                document.getElementById('totVProd').textContent = formatNum(getVal(icmsTot, 'vProd'));
+                document.getElementById('totVFrete').textContent = formatNum(getVal(icmsTot, 'vFrete'));
+                document.getElementById('totVSeg').textContent = formatNum(getVal(icmsTot, 'vSeg'));
+                document.getElementById('totVDesc').textContent = formatNum(getVal(icmsTot, 'vDesc'));
+                document.getElementById('totVOutro').textContent = formatNum(getVal(icmsTot, 'vOutro'));
+                document.getElementById('totVIPI').textContent = formatNum(getVal(icmsTot, 'vIPI'));
+                document.getElementById('totVNF').textContent = formatNum(getVal(icmsTot, 'vNF'));
+            }
+
+            // Informações Complementares
+            if (infAdic) {
+                const inf = getVal(infAdic, 'infCpl') + ' ' + getVal(infAdic, 'infAdFisco');
+                document.getElementById('infCpl').textContent = inf;
+            }
+
+            // Itens
+            const tbody = document.getElementById('listaProdutos');
+            const dets = xmlDoc.querySelectorAll('infNFe > det');
+
+            dets.forEach(det => {
+                const prod = det.querySelector('prod');
+                const imposto = det.querySelector('imposto');
+
+                if (!prod) return;
+
+                const tr = document.createElement('tr');
+
+                let ncm = getVal(prod, 'NCM');
+                let cstStr = '';
+                let vbc = '', vicms = '', vipi = '', picms = '', pipi = '';
+
+                if (imposto) {
+                    const icmsNode = imposto.querySelector('ICMS');
+                    if (icmsNode && icmsNode.firstElementChild) {
+                        const icmsTag = icmsNode.firstElementChild.tagName; // ex: ICMS00
+                        const orig = getVal(icmsNode.firstElementChild, 'orig') || '';
+                        let cst = getVal(icmsNode.firstElementChild, 'CST') || getVal(icmsNode.firstElementChild, 'CSOSN') || '';
+                        cstStr = orig + cst;
+
+                        vbc = formatNum(getVal(icmsNode.firstElementChild, 'vBC'));
+                        picms = formatNum(getVal(icmsNode.firstElementChild, 'pICMS'));
+                        vicms = formatNum(getVal(icmsNode.firstElementChild, 'vICMS'));
+                    }
+
+                    const ipiNode = imposto.querySelector('IPI');
+                    if (ipiNode) {
+                        const ipiTrib = ipiNode.querySelector('IPITrib');
+                        if (ipiTrib) {
+                            pipi = formatNum(getVal(ipiTrib, 'pIPI'));
+                            vipi = formatNum(getVal(ipiTrib, 'vIPI'));
+                        }
+                    }
+                }
+
+                tr.innerHTML = `
+                    <td style="text-align:center;">${getVal(prod, 'cProd')}</td>
+                    <td class="col-str">${getVal(prod, 'xProd')}</td>
+                    <td style="text-align:center;">${ncm}</td>
+                    <td style="text-align:center;">${cstStr}</td>
+                    <td style="text-align:center;">${getVal(prod, 'CFOP')}</td>
+                    <td style="text-align:center;">${getVal(prod, 'uCom')}</td>
+                    <td>${formatNum(getVal(prod, 'qCom'))}</td>
+                    <td>${formatNum(getVal(prod, 'vUnCom'))}</td>
+                    <td>${formatNum(getVal(prod, 'vProd'))}</td>
+                    <td>${vbc}</td>
+                    <td>${vicms}</td>
+                    <td>${vipi}</td>
+                    <td>${picms}</td>
+                    <td>${pipi}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Clean localStorage after populating layout
+            setTimeout(() => { localStorage.removeItem('danfe_xml_temp') }, 2000);
+
+        });
+    </script>
+</body>
+
+</html>
