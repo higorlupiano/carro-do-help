@@ -548,6 +548,21 @@
                     </svg>
                     Filtros de Visualização
                 </h3>
+                <button class="sidebar-btn" id="btnViewAutoteste" disabled>
+                    <span class="sb-icon sb-icon-blue"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg></span>
+                    Autoteste do XML
+                    <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                </button>
+                <div class="sidebar-divider" style="margin-top: 10px; margin-bottom: 20px;"></div>
                 <button class="sidebar-btn" id="btnViewGeral" disabled>
                     <span class="sb-icon sb-icon-blue"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -650,26 +665,10 @@
                             <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
                             <line x1="7" y1="7" x2="7.01" y2="7" />
                         </svg></span>
-                    Agrupar por CST do IBSCBS
+                    Agrupar por CST (RTC)
                     <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
-                        <polyline points="9 18 15 12 9 6" />
-                    </svg>
-                </button>
-                <div class="sidebar-divider"></div>
-                <button class="sidebar-btn" id="btnViewAutoteste" disabled
-                    style="background: var(--primary-light); border-color: var(--primary-color);">
-                    <span class="sb-icon" style="background: var(--primary-color);"><svg
-                            xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                            stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                        </svg></span>
-                    <span style="font-weight: 700; color: var(--primary-color);">Autoteste do XML</span>
-                    <svg class="sb-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-                        viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="9 18 15 12 9 6" />
                     </svg>
                 </button>
@@ -1109,7 +1108,7 @@
             }
             else if (viewId === 'ncm' || viewId === 'cfop' || viewId === 'cst' || viewId === 'cClassTrib') {
                 const groupKey = viewId === 'ncm' ? 'NCM' : viewId === 'cfop' ? 'CFOP' : viewId === 'cst' ? 'CST' : 'CST_IBSCBS';
-                const groupLabel = viewId === 'cClassTrib' ? 'CST do IBSCBS' : groupKey.toUpperCase();
+                const groupLabel = viewId === 'cClassTrib' ? 'CST (RTC)' : groupKey.toUpperCase();
 
                 if (viewId === 'cClassTrib') {
                     hHTML = `<tr><th>${groupLabel}</th><th>Itens (Qtde)</th><th>Somatório vBC IBSCBS</th><th>Somatório vIBSUF</th><th>Somatório vIBSMun</th><th>Somatório vCBS</th></tr>`;
@@ -1828,7 +1827,8 @@
                     calculated: parseFloat(calculated) || 0,
                     formula: formula,
                     status: status,
-                    msg: msg
+                    msg: msg,
+                    variables: opts.variables || null
                 });
             }
 
@@ -1838,6 +1838,7 @@
 
                 let sumTotProd = 0, sumTotFrete = 0, sumTotSeg = 0, sumTotDesc = 0, sumTotOutro = 0;
                 let sumTotIcms = 0, sumTotIpi = 0, sumTotPis = 0, sumTotCofins = 0;
+                let sumTotFcp = 0, sumTotFcpSt = 0, sumTotFcpStRet = 0, sumTotSt = 0;
 
                 dets.forEach(det => {
                     const pos = det.getAttribute('nItem');
@@ -1915,6 +1916,10 @@
                             const vBCST = parseFloat(getVal(icmsChild, 'vBCST')) || 0;
                             const pMVAST = parseFloat(getVal(icmsChild, 'pMVAST')) || 0;
                             const pRedBCST = parseFloat(getVal(icmsChild, 'pRedBCST')) || 0;
+                            const pICMSST = parseFloat(getVal(icmsChild, 'pICMSST')) || 0;
+                            const vICMSST = parseFloat(getVal(icmsChild, 'vICMSST')) || 0;
+
+                            if (vICMSST > 0) sumTotSt += vICMSST;
 
                             if (vBCST > 0 && pMVAST > 0) {
                                 const vIPI = parseFloat(getVal(imposto.querySelector('IPI'), 'vIPI')) || 0;
@@ -1929,6 +1934,35 @@
                                     }
                                 }
                             }
+
+                            if (vBCST > 0 && pICMSST > 0 && vICMSST > 0) {
+                                const vICMSOp = parseFloat(getVal(icmsChild, 'vICMSOp')) || vICMS;
+                                let expectedIcmsSt = (vBCST * (pICMSST / 100)) - vICMSOp;
+                                if (Math.abs(vICMSST - expectedIcmsSt) <= eps) {
+                                    addTest(origin, 'ICMS ST', `Cálculo Final do ICMS ST`, vICMSST, expectedIcmsSt, `(vBCST × pICMSST) - vICMS Próprio da Operação`);
+                                }
+                            }
+
+                            // FCP
+                            const vFCP = parseFloat(getVal(icmsChild, 'vFCP')) || 0;
+                            const vBCFCP = parseFloat(getVal(icmsChild, 'vBCFCP')) || 0;
+                            const pFCP = parseFloat(getVal(icmsChild, 'pFCP')) || 0;
+                            if (vFCP > 0) sumTotFcp += vFCP;
+                            if (vFCP > 0 && vBCFCP > 0 && pFCP > 0) {
+                                addTest(origin, 'FCP', `Cálculo de FCP`, vFCP, vBCFCP * (pFCP / 100), `vBCFCP (${vBCFCP.toFixed(2)}) × pFCP (${pFCP}%)`);
+                            }
+
+                            // FCP ST
+                            const vFCPST = parseFloat(getVal(icmsChild, 'vFCPST')) || 0;
+                            const vBCFCPST = parseFloat(getVal(icmsChild, 'vBCFCPST')) || 0;
+                            const pFCPST = parseFloat(getVal(icmsChild, 'pFCPST')) || 0;
+                            if (vFCPST > 0) sumTotFcpSt += vFCPST;
+                            if (vFCPST > 0 && vBCFCPST > 0 && pFCPST > 0) {
+                                addTest(origin, 'FCP ST', `Cálculo de FCP ST`, vFCPST, vBCFCPST * (pFCPST / 100), `vBCFCPST (${vBCFCPST.toFixed(2)}) × pFCPST (${pFCPST}%)`);
+                            }
+
+                            const vFCPSTRet = parseFloat(getVal(icmsChild, 'vFCPSTRet')) || 0;
+                            if (vFCPSTRet > 0) sumTotFcpStRet += vFCPSTRet;
                         }
 
                         // IPI
@@ -2004,6 +2038,14 @@
                                         addTest(origin, 'CBS', 'Cálculo de CBS', vCBS, vBC * (pCBS / 100), `vBC (${vBC.toFixed(2)}) × pCBS (${pCBS.toFixed(2)}%)`);
                                     }
                                 }
+
+                                const vIBSUF = parseFloat(getVal(gIBSUF, 'vIBSUF')) || 0;
+                                const gIBSMun = gIBSCBS.querySelector('gIBSMun');
+                                const vIBSMun = parseFloat(getVal(gIBSMun, 'vIBSMun')) || 0;
+
+                                if (vIBS > 0 && (vIBSUF > 0 || vIBSMun > 0)) {
+                                    addTest(origin, 'IBS', 'Rateio Federativo (IBS)', vIBS, vIBSUF + vIBSMun, `vIBSUF (${vIBSUF.toFixed(2)}) + vIBSMun (${vIBSMun.toFixed(2)})`);
+                                }
                             }
                         }
                     }
@@ -2028,11 +2070,52 @@
                     if (sumTotIpi > 0) addTest(origin, 'Totais Globais', 'Somatório vIPI', parseFloat(t.vIPI) || 0, sumTotIpi, `Σ (vIPI itens)`);
                     if (sumTotPis > 0) addTest(origin, 'Totais Globais', 'Somatório vPIS', parseFloat(t.vPIS) || 0, sumTotPis, `Σ (vPIS itens)`);
                     if (sumTotCofins > 0) addTest(origin, 'Totais Globais', 'Somatório vCOFINS', parseFloat(t.vCOFINS) || 0, sumTotCofins, `Σ (vCOFINS itens)`);
+                    if (sumTotSt > 0) addTest(origin, 'Totais Globais', 'Somatório vST', parseFloat(t.vST) || 0, sumTotSt, `Σ (vICMSST itens)`);
+                    if (sumTotFcp > 0) addTest(origin, 'Totais Globais', 'Somatório vFCP', parseFloat(t.vFCP) || 0, sumTotFcp, `Σ (vFCP itens)`);
+                    if (sumTotFcpSt > 0) addTest(origin, 'Totais Globais', 'Somatório vFCPST', parseFloat(t.vFCPST) || 0, sumTotFcpSt, `Σ (vFCPST itens)`);
+                    if (sumTotFcpStRet > 0) addTest(origin, 'Totais Globais', 'Somatório vFCPSTRet', parseFloat(t.vFCPSTRet) || 0, sumTotFcpStRet, `Σ (vFCPSTRet itens)`);
 
-                    // Validação de cálculo total da nota
-                    // vNF = vProd - vDesc - vICMSDeson + vST + vFrete + vSeg + vOutro + vII + vIPI + vServ + (alguns dependendo da operacao)
-                    // Faremos uma estimativa genérica, não é tao simples bater vNF sem saber a exata composição de ST/IPI se estão inclusos etc
-                    // Se quisermos ser rigorosos precisamos seguir estritamente o manual. Mostraremos as somas ao inves.
+                    // Validação de cálculo total da nota genérica
+                    const decVNF = parseFloat(t.vNF) || 0;
+                    const vDescTot = parseFloat(t.vDesc) || 0;
+                    const vICMSDesonTot = parseFloat(t.vICMSDeson) || 0;
+                    const vSTTot = parseFloat(t.vST) || 0;
+                    const vFreteTot = parseFloat(t.vFrete) || 0;
+                    const vSegTot = parseFloat(t.vSeg) || 0;
+                    const vOutroTot = parseFloat(t.vOutro) || 0;
+                    const vIITot = parseFloat(t.vII) || 0;
+                    const vIPITot = parseFloat(t.vIPI) || 0;
+                    const vFCPSTTot = parseFloat(t.vFCPST) || 0;
+                    const vFCPSTRetTot = parseFloat(t.vFCPSTRet) || 0;
+
+                    let calcTotalVNF =
+                        (parseFloat(t.vProd) || 0)
+                        - vDescTot
+                        + vSTTot
+                        + vFreteTot
+                        + vSegTot
+                        + vOutroTot
+                        + vIITot
+                        + vIPITot
+                        + vFCPSTTot
+                        + vFCPSTRetTot;
+
+                    if (decVNF > 0) {
+                        addTest(origin, 'Totais Globais', 'Cálculo do Valor Total da NF-e (vNF)', decVNF, calcTotalVNF, `vProd - vDesc + vST + vFrete + vSeg + vOutro + vII + vIPI + vFCPST + vFCPSTRet`, {
+                            variables: {
+                                vProd: (parseFloat(t.vProd) || 0),
+                                vDesc: vDescTot,
+                                vST: vSTTot,
+                                vFrete: vFreteTot,
+                                vSeg: vSegTot,
+                                vOutro: vOutroTot,
+                                vII: vIITot,
+                                vIPI: vIPITot,
+                                vFCPST: vFCPSTTot,
+                                vFCPSTRet: vFCPSTRetTot
+                            }
+                        });
+                    }
                 }
 
             } catch (e) {
@@ -2112,7 +2195,14 @@
                                 <strong>Diferença Absoluta</strong>
                                 <span>R$ ${Math.abs(res.declared - res.calculated).toFixed(2)}</span>
                             </div>
-                            <div class="autoteste-formula">Fórmula: ${res.formula}</div>
+                            <div class="autoteste-formula" ${res.variables ? 'style="cursor:pointer; user-select:none; transition: background 0.2s;" onmousedown="this.style.background=\'rgba(0,0,0,0.5)\'" onmouseup="this.style.background=\'\'" onmouseleave="this.style.background=\'\'" onclick="const ns = this.nextElementSibling; ns.style.display = ns.style.display === \'none\' ? \'block\' : \'none\'"' : ''}>
+                                Fórmula: ${res.formula}
+                                ${res.variables ? '<span style="float:right; opacity:0.8; font-size:0.75rem; margin-top:2px;">↳ Clique para ver os valores ▼</span>' : ''}
+                            </div>
+                            ${res.variables ?
+                            `<div class="autoteste-formula-vars" style="display:none; padding:12px 16px; background:#1e293b; font-family:monospace; font-size:0.85rem; color:#e2e8f0; border-radius: 0 0 6px 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.25);">` +
+                            Object.entries(res.variables).map(([k, v]) => `<div style="display:flex; justify-content:space-between; margin-bottom:4px; max-width:300px; border-bottom: 1px dotted rgba(255,255,255,0.1); padding-bottom: 2px;"><strong style="color:#60a5fa;">${k}</strong> <span>${typeof v === 'number' ? 'R$ ' + v.toFixed(2) : v}</span></div>`).join('') +
+                            `</div>` : ''}
                         </div>
                     `;
                     listContainer.appendChild(item);
