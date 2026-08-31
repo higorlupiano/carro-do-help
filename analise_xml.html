@@ -1839,6 +1839,7 @@
                 let sumTotProd = 0, sumTotFrete = 0, sumTotSeg = 0, sumTotDesc = 0, sumTotOutro = 0;
                 let sumTotIcms = 0, sumTotIpi = 0, sumTotPis = 0, sumTotCofins = 0;
                 let sumTotFcp = 0, sumTotFcpSt = 0, sumTotFcpStRet = 0, sumTotSt = 0;
+                let sumObrigatorioIcmsDeson = 0;
 
                 dets.forEach(det => {
                     const pos = det.getAttribute('nItem');
@@ -1863,7 +1864,7 @@
 
                     // vProd Test
                     let calcVProd = qCom * vUnCom;
-                    addTest(origin, 'Geral', `Valor Bruto do Produto (vProd)`, vProd, calcVProd, `qCom (${qCom.toFixed(4)}) × vUnCom (${vUnCom.toFixed(4)}) = ${calcVProd.toFixed(2)}`);
+                    addTest(origin, 'Geral', `Valor Bruto do Produto (vProd)`, vProd, calcVProd, `qCom (${qCom.toFixed(4)}) × vUnCom (${vUnCom.toFixed(4)}) = ${calcVProd.toFixed(2)}`, { variables: { qCom, vUnCom } });
 
                     // Impostos
                     if (imposto) {
@@ -1878,8 +1879,14 @@
                                 let calcIcms = vBC * (pICMS / 100);
                                 sumTotIcms += vICMS;
 
+                                const vICMSDeson = parseFloat(getVal(icmsChild, 'vICMSDeson')) || 0;
+                                const indDeduzDeson = getVal(icmsChild, 'indDeduzDeson');
+                                if (vICMSDeson > 0 && String(indDeduzDeson) === '1') {
+                                    sumObrigatorioIcmsDeson += vICMSDeson;
+                                }
+
                                 // Test ICMS Calculation
-                                addTest(origin, 'ICMS', `Cálculo de ICMS`, vICMS, calcIcms, `vBC (${vBC.toFixed(2)}) × pICMS (${pICMS}%) = ${calcIcms.toFixed(2)}`);
+                                addTest(origin, 'ICMS', `Cálculo de ICMS`, vICMS, calcIcms, `vBC (${vBC.toFixed(2)}) × pICMS (${pICMS}%) = ${calcIcms.toFixed(2)}`, { variables: { vBC, pICMS } });
 
                                 // Test BC Composition if applicable. Normal: vProd + frete + seg + outro - desc + IPI (sometimes)
                                 const vIPI = parseFloat(getVal(imposto.querySelector('IPI'), 'vIPI')) || 0;
@@ -1894,20 +1901,20 @@
                                 let expectedStr = `vProd (${vProd}) + Frete (${vFrete}) + Seg (${vSeg}) + Outro (${vOutro}) - Desc (${vDesc})`;
 
                                 if (pRedBC > 0 && Math.abs(vBC - expectedBcReducao) <= eps) {
-                                    addTest(origin, 'ICMS', `Composição de BC ICMS (Redução pRedBC)`, vBC, expectedBcReducao, `(${expectedStr}) × (1 - ${pRedBC}%)`);
+                                    addTest(origin, 'ICMS', `Composição de BC ICMS (Redução pRedBC)`, vBC, expectedBcReducao, `(${expectedStr}) × (1 - ${pRedBC}%)`, { variables: { vProd, vFrete, vSeg, vOutro, vDesc, pRedBC } });
                                 } else if (bcDiffSemIpi <= eps) {
-                                    addTest(origin, 'ICMS', `Composição de BC ICMS (Mínima)`, vBC, expectedBcSemIpi, expectedStr);
+                                    addTest(origin, 'ICMS', `Composição de BC ICMS (Mínima)`, vBC, expectedBcSemIpi, expectedStr, { variables: { vProd, vFrete, vSeg, vOutro, vDesc } });
                                 } else if (bcDiffComIpi <= eps) {
-                                    addTest(origin, 'ICMS', `Composição de BC ICMS (Incluso IPI)`, vBC, expectedBcComIpi, `${expectedStr} + vIPI (${vIPI})`);
+                                    addTest(origin, 'ICMS', `Composição de BC ICMS (Incluso IPI)`, vBC, expectedBcComIpi, `${expectedStr} + vIPI (${vIPI})`, { variables: { vProd, vFrete, vSeg, vOutro, vDesc, vIPI } });
                                 } else {
                                     // Test por dentro
                                     let bcPorDentro = expectedBcSemIpi / (1 - (pICMS / 100));
                                     if (Math.abs(vBC - bcPorDentro) <= eps) {
-                                        addTest(origin, 'ICMS', `Composição de BC ICMS (Por Dentro)`, vBC, bcPorDentro, `(${expectedStr}) / (1 - ${pICMS / 100})`);
+                                        addTest(origin, 'ICMS', `Composição de BC ICMS (Por Dentro)`, vBC, bcPorDentro, `(${expectedStr}) / (1 - ${pICMS / 100})`, { variables: { vProd, vFrete, vSeg, vOutro, vDesc, pICMS } });
                                     } else {
                                         // Não foi possível identificar
                                         let bMsg = pRedBC > 0 ? `Redução informada (${pRedBC}%), porém não bate com vBC.` : 'A BC informada não bate com as fórmulas padrão.';
-                                        addTest(origin, 'ICMS', `Composição de BC ICMS (Indeterminada)`, vBC, vBC, `Valores operacionais sugerem ${expectedBcSemIpi.toFixed(2)}, vBC informada é ${vBC.toFixed(2)}.`, { forceWarning: true, msg: bMsg });
+                                        addTest(origin, 'ICMS', `Composição de BC ICMS (Indeterminada)`, vBC, vBC, `Valores operacionais sugerem ${expectedBcSemIpi.toFixed(2)}, vBC informada é ${vBC.toFixed(2)}.`, { forceWarning: true, msg: bMsg, variables: { vProd, vFrete, vSeg, vOutro, vDesc, Informado: vBC } });
                                     }
                                 }
                             }
@@ -1927,10 +1934,10 @@
                                 let baseSt = (expectedBcSemIpi_ST + vIPI) * (1 + (pMVAST / 100)) * (1 - (pRedBCST / 100));
 
                                 if (Math.abs(vBCST - baseSt) <= eps) {
-                                    addTest(origin, 'ICMS ST', `Composição de BC ST (MVA)`, vBCST, baseSt, `((BC Mínima + vIPI) × (1 + MVA ${pMVAST}%)) × (1 - pRedBCST ${pRedBCST}%)`);
+                                    addTest(origin, 'ICMS ST', `Composição de BC ST (MVA)`, vBCST, baseSt, `((BC Mínima + vIPI) × (1 + MVA ${pMVAST}%)) × (1 - pRedBCST ${pRedBCST}%)`, { variables: { BC_Minima: expectedBcSemIpi_ST, vIPI, pMVAST, pRedBCST } });
                                 } else {
                                     if (Math.abs(vBCST - baseSt) > 0.005) {
-                                        addTest(origin, 'ICMS ST', `Composição de BC ST (Indeterminada)`, vBCST, baseSt, `Dependente da origem ou Por Dentro.`, { forceWarning: true, msg: `Cálculo via MVA Padrão totaliza R$ ${baseSt.toFixed(2)}.` });
+                                        addTest(origin, 'ICMS ST', `Composição de BC ST (Indeterminada)`, vBCST, baseSt, `Dependente da origem ou Por Dentro.`, { forceWarning: true, msg: `Cálculo via MVA Padrão totaliza R$ ${baseSt.toFixed(2)}.`, variables: { Calc_Minimo: baseSt, Informado: vBCST } });
                                     }
                                 }
                             }
@@ -1939,7 +1946,7 @@
                                 const vICMSOp = parseFloat(getVal(icmsChild, 'vICMSOp')) || vICMS;
                                 let expectedIcmsSt = (vBCST * (pICMSST / 100)) - vICMSOp;
                                 if (Math.abs(vICMSST - expectedIcmsSt) <= eps) {
-                                    addTest(origin, 'ICMS ST', `Cálculo Final do ICMS ST`, vICMSST, expectedIcmsSt, `(vBCST × pICMSST) - vICMS Próprio da Operação`);
+                                    addTest(origin, 'ICMS ST', `Cálculo Final do ICMS ST`, vICMSST, expectedIcmsSt, `(vBCST × pICMSST) - vICMS Próprio da Operação`, { variables: { vBCST, pICMSST, vICMSOp } });
                                 }
                             }
 
@@ -1949,7 +1956,7 @@
                             const pFCP = parseFloat(getVal(icmsChild, 'pFCP')) || 0;
                             if (vFCP > 0) sumTotFcp += vFCP;
                             if (vFCP > 0 && vBCFCP > 0 && pFCP > 0) {
-                                addTest(origin, 'FCP', `Cálculo de FCP`, vFCP, vBCFCP * (pFCP / 100), `vBCFCP (${vBCFCP.toFixed(2)}) × pFCP (${pFCP}%)`);
+                                addTest(origin, 'FCP', `Cálculo de FCP`, vFCP, vBCFCP * (pFCP / 100), `vBCFCP (${vBCFCP.toFixed(2)}) × pFCP (${pFCP}%)`, { variables: { vBCFCP, pFCP } });
                             }
 
                             // FCP ST
@@ -1958,7 +1965,7 @@
                             const pFCPST = parseFloat(getVal(icmsChild, 'pFCPST')) || 0;
                             if (vFCPST > 0) sumTotFcpSt += vFCPST;
                             if (vFCPST > 0 && vBCFCPST > 0 && pFCPST > 0) {
-                                addTest(origin, 'FCP ST', `Cálculo de FCP ST`, vFCPST, vBCFCPST * (pFCPST / 100), `vBCFCPST (${vBCFCPST.toFixed(2)}) × pFCPST (${pFCPST}%)`);
+                                addTest(origin, 'FCP ST', `Cálculo de FCP ST`, vFCPST, vBCFCPST * (pFCPST / 100), `vBCFCPST (${vBCFCPST.toFixed(2)}) × pFCPST (${pFCPST}%)`, { variables: { vBCFCPST, pFCPST } });
                             }
 
                             const vFCPSTRet = parseFloat(getVal(icmsChild, 'vFCPSTRet')) || 0;
@@ -1973,7 +1980,7 @@
                             const vIPI = parseFloat(getVal(ipiNode, 'vIPI')) || 0;
                             if (pIPI > 0 && vBCIPI > 0) {
                                 sumTotIpi += vIPI;
-                                addTest(origin, 'IPI', 'Cálculo de IPI', vIPI, vBCIPI * (pIPI / 100), `vBC IPI (${vBCIPI.toFixed(2)}) × pIPI (${pIPI}%)`);
+                                addTest(origin, 'IPI', 'Cálculo de IPI', vIPI, vBCIPI * (pIPI / 100), `vBC IPI (${vBCIPI.toFixed(2)}) × pIPI (${pIPI}%)`, { variables: { vBCIPI, pIPI } });
                             }
                         }
 
@@ -1985,7 +1992,7 @@
                             const vPIS = parseFloat(getVal(pisNode, 'vPIS')) || 0;
                             if (pPIS > 0 && vBCPIS > 0) {
                                 sumTotPis += vPIS;
-                                addTest(origin, 'PIS', 'Cálculo de PIS', vPIS, vBCPIS * (pPIS / 100), `vBC PIS (${vBCPIS.toFixed(2)}) × pPIS (${pPIS}%)`);
+                                addTest(origin, 'PIS', 'Cálculo de PIS', vPIS, vBCPIS * (pPIS / 100), `vBC PIS (${vBCPIS.toFixed(2)}) × pPIS (${pPIS}%)`, { variables: { vBCPIS, pPIS } });
                             }
                         }
 
@@ -1997,7 +2004,7 @@
                             const vCOFINS = parseFloat(getVal(cofinsNode, 'vCOFINS')) || 0;
                             if (pCOFINS > 0 && vBCCOFINS > 0) {
                                 sumTotCofins += vCOFINS;
-                                addTest(origin, 'COFINS', 'Cálculo de COFINS', vCOFINS, vBCCOFINS * (pCOFINS / 100), `vBC COFINS (${vBCCOFINS.toFixed(2)}) × pCOFINS (${pCOFINS}%)`);
+                                addTest(origin, 'COFINS', 'Cálculo de COFINS', vCOFINS, vBCCOFINS * (pCOFINS / 100), `vBC COFINS (${vBCCOFINS.toFixed(2)}) × pCOFINS (${pCOFINS}%)`, { variables: { vBCCOFINS, pCOFINS } });
                             }
                         }
 
@@ -2031,11 +2038,33 @@
                                 }
 
                                 if (vBC > 0) {
+                                    let vII = parseFloat(getVal(imposto.querySelector('II'), 'vII')) || 0;
+                                    let vIS = parseFloat(getVal(imposto.querySelector('IS'), 'vIS')) || 0;
+                                    let vPIS = parseFloat(getVal(imposto.querySelector('PIS'), 'vPIS')) || 0;
+                                    let vCOFINS = parseFloat(getVal(imposto.querySelector('COFINS'), 'vCOFINS')) || 0;
+
+                                    let vICMS = 0, vFCP = 0;
+                                    if (imposto.querySelector('ICMS') && imposto.querySelector('ICMS').children[0]) {
+                                        vICMS = parseFloat(getVal(imposto.querySelector('ICMS').children[0], 'vICMS')) || 0;
+                                        vFCP = parseFloat(getVal(imposto.querySelector('ICMS').children[0], 'vFCP')) || 0;
+                                    }
+                                    let vICMSUFDest = parseFloat(getVal(imposto.querySelector('ICMSUFDest'), 'vICMSUFDest')) || 0;
+                                    let vFCPUFDest = parseFloat(getVal(imposto.querySelector('ICMSUFDest'), 'vFCPUFDest')) || 0;
+
+                                    // BC do IBS/CBS: vProd + frete + seg + outro + II + IS - desc - PIS - COFINS - ICMS - FCP - ICMSUFDest - FCPUFDest
+                                    let expectedBcIbsCbs = vProd + vFrete + vSeg + vOutro + vII + vIS - vDesc - vPIS - vCOFINS - vICMS - vFCP - vICMSUFDest - vFCPUFDest;
+
+                                    if (Math.abs(vBC - expectedBcIbsCbs) <= eps) {
+                                        addTest(origin, 'IBS/CBS', 'Composição de BC IBS/CBS', vBC, expectedBcIbsCbs, 'vProd+vFrete+vSeg+vOutro+vII+vIS-vDesc-vPIS-vCOFINS-vICMS-vFCP-ICMSUFDest-FCPUFDest');
+                                    } else {
+                                        addTest(origin, 'IBS/CBS', 'Composição de BC IBS/CBS (Indeterminada)', vBC, expectedBcIbsCbs, 'Múltiplas deduções. Não bate com padrão.', { forceWarning: true, variables: { vProd, vFrete, vSeg, vOutro, vII, vIS, vDesc, vPIS, vCOFINS, vICMS, vFCP, vICMSUFDest, vFCPUFDest, Informado: vBC } });
+                                    }
+
                                     if (pIBS > 0) {
-                                        addTest(origin, 'IBS', 'Cálculo de IBS', vIBS, vBC * (pIBS / 100), `vBC (${vBC.toFixed(2)}) × pIBS (${pIBS.toFixed(2)}%)`);
+                                        addTest(origin, 'IBS', 'Cálculo de IBS', vIBS, vBC * (pIBS / 100), `vBC (${vBC.toFixed(2)}) × pIBS (${pIBS.toFixed(2)}%)`, { variables: { vBC, pIBS } });
                                     }
                                     if (pCBS > 0) {
-                                        addTest(origin, 'CBS', 'Cálculo de CBS', vCBS, vBC * (pCBS / 100), `vBC (${vBC.toFixed(2)}) × pCBS (${pCBS.toFixed(2)}%)`);
+                                        addTest(origin, 'CBS', 'Cálculo de CBS', vCBS, vBC * (pCBS / 100), `vBC (${vBC.toFixed(2)}) × pCBS (${pCBS.toFixed(2)}%)`, { variables: { vBC, pCBS } });
                                     }
                                 }
 
@@ -2044,7 +2073,7 @@
                                 const vIBSMun = parseFloat(getVal(gIBSMun, 'vIBSMun')) || 0;
 
                                 if (vIBS > 0 && (vIBSUF > 0 || vIBSMun > 0)) {
-                                    addTest(origin, 'IBS', 'Rateio Federativo (IBS)', vIBS, vIBSUF + vIBSMun, `vIBSUF (${vIBSUF.toFixed(2)}) + vIBSMun (${vIBSMun.toFixed(2)})`);
+                                    addTest(origin, 'IBS', 'Rateio Federativo (IBS)', vIBS, vIBSUF + vIBSMun, `vIBSUF (${vIBSUF.toFixed(2)}) + vIBSMun (${vIBSMun.toFixed(2)})`, { variables: { vIBSUF, vIBSMun } });
                                 }
                             }
                         }
@@ -2057,23 +2086,23 @@
                     const origin = 'Totais da NF-e';
 
                     const decVProd = parseFloat(t.vProd) || 0;
-                    addTest(origin, 'Totais Globais', 'Somatório Total Produtos (vProd)', decVProd, sumTotProd, `Σ (vProd itens) = ${sumTotProd.toFixed(2)}`);
+                    addTest(origin, 'Totais Globais', 'Somatório Total Produtos (vProd)', decVProd, sumTotProd, `Σ (vProd itens) = ${sumTotProd.toFixed(2)}`, { variables: { Soma_Itens: sumTotProd } });
 
                     const decVFrete = parseFloat(t.vFrete) || 0;
-                    addTest(origin, 'Totais Globais', 'Somatório de Frete (vFrete)', decVFrete, sumTotFrete, `Σ (vFrete itens) = ${sumTotFrete.toFixed(2)}`);
+                    addTest(origin, 'Totais Globais', 'Somatório de Frete (vFrete)', decVFrete, sumTotFrete, `Σ (vFrete itens) = ${sumTotFrete.toFixed(2)}`, { variables: { Soma_Itens: sumTotFrete } });
 
                     const decVDesc = parseFloat(t.vDesc) || 0;
-                    addTest(origin, 'Totais Globais', 'Somatório de Descontos (vDesc)', decVDesc, sumTotDesc, `Σ (vDesc itens) = ${sumTotDesc.toFixed(2)}`);
+                    addTest(origin, 'Totais Globais', 'Somatório de Descontos (vDesc)', decVDesc, sumTotDesc, `Σ (vDesc itens) = ${sumTotDesc.toFixed(2)}`, { variables: { Soma_Itens: sumTotDesc } });
 
                     // Somatorios de impostos
-                    if (sumTotIcms > 0) addTest(origin, 'Totais Globais', 'Somatório vICMS', parseFloat(t.vICMS) || 0, sumTotIcms, `Σ (vICMS itens)`);
-                    if (sumTotIpi > 0) addTest(origin, 'Totais Globais', 'Somatório vIPI', parseFloat(t.vIPI) || 0, sumTotIpi, `Σ (vIPI itens)`);
-                    if (sumTotPis > 0) addTest(origin, 'Totais Globais', 'Somatório vPIS', parseFloat(t.vPIS) || 0, sumTotPis, `Σ (vPIS itens)`);
-                    if (sumTotCofins > 0) addTest(origin, 'Totais Globais', 'Somatório vCOFINS', parseFloat(t.vCOFINS) || 0, sumTotCofins, `Σ (vCOFINS itens)`);
-                    if (sumTotSt > 0) addTest(origin, 'Totais Globais', 'Somatório vST', parseFloat(t.vST) || 0, sumTotSt, `Σ (vICMSST itens)`);
-                    if (sumTotFcp > 0) addTest(origin, 'Totais Globais', 'Somatório vFCP', parseFloat(t.vFCP) || 0, sumTotFcp, `Σ (vFCP itens)`);
-                    if (sumTotFcpSt > 0) addTest(origin, 'Totais Globais', 'Somatório vFCPST', parseFloat(t.vFCPST) || 0, sumTotFcpSt, `Σ (vFCPST itens)`);
-                    if (sumTotFcpStRet > 0) addTest(origin, 'Totais Globais', 'Somatório vFCPSTRet', parseFloat(t.vFCPSTRet) || 0, sumTotFcpStRet, `Σ (vFCPSTRet itens)`);
+                    if (sumTotIcms > 0) addTest(origin, 'Totais Globais', 'Somatório vICMS', parseFloat(t.vICMS) || 0, sumTotIcms, `Σ (vICMS itens)`, { variables: { Soma_Itens: sumTotIcms } });
+                    if (sumTotIpi > 0) addTest(origin, 'Totais Globais', 'Somatório vIPI', parseFloat(t.vIPI) || 0, sumTotIpi, `Σ (vIPI itens)`, { variables: { Soma_Itens: sumTotIpi } });
+                    if (sumTotPis > 0) addTest(origin, 'Totais Globais', 'Somatório vPIS', parseFloat(t.vPIS) || 0, sumTotPis, `Σ (vPIS itens)`, { variables: { Soma_Itens: sumTotPis } });
+                    if (sumTotCofins > 0) addTest(origin, 'Totais Globais', 'Somatório vCOFINS', parseFloat(t.vCOFINS) || 0, sumTotCofins, `Σ (vCOFINS itens)`, { variables: { Soma_Itens: sumTotCofins } });
+                    if (sumTotSt > 0) addTest(origin, 'Totais Globais', 'Somatório vST', parseFloat(t.vST) || 0, sumTotSt, `Σ (vICMSST itens)`, { variables: { Soma_Itens: sumTotSt } });
+                    if (sumTotFcp > 0) addTest(origin, 'Totais Globais', 'Somatório vFCP', parseFloat(t.vFCP) || 0, sumTotFcp, `Σ (vFCP itens)`, { variables: { Soma_Itens: sumTotFcp } });
+                    if (sumTotFcpSt > 0) addTest(origin, 'Totais Globais', 'Somatório vFCPST', parseFloat(t.vFCPST) || 0, sumTotFcpSt, `Σ (vFCPST itens)`, { variables: { Soma_Itens: sumTotFcpSt } });
+                    if (sumTotFcpStRet > 0) addTest(origin, 'Totais Globais', 'Somatório vFCPSTRet', parseFloat(t.vFCPSTRet) || 0, sumTotFcpStRet, `Σ (vFCPSTRet itens)`, { variables: { Soma_Itens: sumTotFcpStRet } });
 
                     // Validação de cálculo total da nota genérica
                     const decVNF = parseFloat(t.vNF) || 0;
@@ -2091,28 +2120,28 @@
                     let calcTotalVNF =
                         (parseFloat(t.vProd) || 0)
                         - vDescTot
+                        - sumObrigatorioIcmsDeson
                         + vSTTot
                         + vFreteTot
                         + vSegTot
                         + vOutroTot
                         + vIITot
                         + vIPITot
-                        + vFCPSTTot
-                        + vFCPSTRetTot;
+                        + vFCPSTTot;
 
                     if (decVNF > 0) {
-                        addTest(origin, 'Totais Globais', 'Cálculo do Valor Total da NF-e (vNF)', decVNF, calcTotalVNF, `vProd - vDesc + vST + vFrete + vSeg + vOutro + vII + vIPI + vFCPST + vFCPSTRet`, {
+                        addTest(origin, 'Totais Globais', 'Cálculo do Valor Total da NF-e (vNF)', decVNF, calcTotalVNF, `vProd - vDesc - ICMSDeson(ind1) + vST + vFrete + vSeg + vOutro + vII + vIPI + vFCPST`, {
                             variables: {
                                 vProd: (parseFloat(t.vProd) || 0),
                                 vDesc: vDescTot,
+                                ICMSDesonDeduzido: sumObrigatorioIcmsDeson,
                                 vST: vSTTot,
                                 vFrete: vFreteTot,
                                 vSeg: vSegTot,
                                 vOutro: vOutroTot,
                                 vII: vIITot,
                                 vIPI: vIPITot,
-                                vFCPST: vFCPSTTot,
-                                vFCPSTRet: vFCPSTRetTot
+                                vFCPST: vFCPSTTot
                             }
                         });
                     }
@@ -2195,9 +2224,9 @@
                                 <strong>Diferença Absoluta</strong>
                                 <span>R$ ${Math.abs(res.declared - res.calculated).toFixed(2)}</span>
                             </div>
-                            <div class="autoteste-formula" ${res.variables ? 'style="cursor:pointer; user-select:none; transition: background 0.2s;" onmousedown="this.style.background=\'rgba(0,0,0,0.5)\'" onmouseup="this.style.background=\'\'" onmouseleave="this.style.background=\'\'" onclick="const ns = this.nextElementSibling; ns.style.display = ns.style.display === \'none\' ? \'block\' : \'none\'"' : ''}>
+                            <div class="autoteste-formula" ${res.variables ? 'style="cursor:pointer; transition: background 0.2s;" onmousedown="this.style.background=\'rgba(0,0,0,0.5)\'" onmouseup="this.style.background=\'\'" onmouseleave="this.style.background=\'\'" onclick="if(window.getSelection().toString()) return; const ns = this.nextElementSibling; ns.style.display = ns.style.display === \'none\' ? \'block\' : \'none\'"' : ''}>
                                 Fórmula: ${res.formula}
-                                ${res.variables ? '<span style="float:right; opacity:0.8; font-size:0.75rem; margin-top:2px;">↳ Clique para ver os valores ▼</span>' : ''}
+                                ${res.variables ? '<span style="float:right; opacity:0.8; font-size:0.75rem; margin-top:2px; pointer-events:none;">↳ Clique para ver os valores ▼</span>' : ''}
                             </div>
                             ${res.variables ?
                             `<div class="autoteste-formula-vars" style="display:none; padding:12px 16px; background:#1e293b; font-family:monospace; font-size:0.85rem; color:#e2e8f0; border-radius: 0 0 6px 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.25);">` +
