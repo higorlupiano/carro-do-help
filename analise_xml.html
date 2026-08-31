@@ -1376,7 +1376,11 @@
         // EXPORTAÇÕES (CSV, TXT, PDF)
         // =========================================================
         document.getElementById('exportCsvBtn').addEventListener('click', () => {
-            const ths = Array.from(tableHead.querySelectorAll('th')).map(th => `"${th.innerText}"`);
+            const ths = Array.from(tableHead.querySelectorAll('th')).map(th => {
+                const icon = th.querySelector('.sort-icon');
+                const text = icon ? th.innerText.replace(icon.textContent, '').trim() : th.innerText.trim();
+                return `"${text}"`;
+            });
             const csvRows = [ths.join(',')];
 
             const trs = Array.from(tableBody.querySelectorAll('tr'))
@@ -1396,7 +1400,11 @@
 
         document.getElementById('exportTxtBtn').addEventListener('click', () => {
             // Reaproveita logica do CSV, muda pra tabulacao \t
-            const ths = Array.from(tableHead.querySelectorAll('th')).map(th => th.innerText.padEnd(20));
+            const ths = Array.from(tableHead.querySelectorAll('th')).map(th => {
+                const icon = th.querySelector('.sort-icon');
+                const text = icon ? th.innerText.replace(icon.textContent, '').trim() : th.innerText.trim();
+                return text.padEnd(20);
+            });
             const txtRows = [ths.join(' | ')];
 
             const trs = Array.from(tableBody.querySelectorAll('tr'))
@@ -1427,7 +1435,13 @@
                 html: '#dataTable',
                 startY: 35,
                 styles: { fontSize: 8 },
-                headStyles: { fillColor: [42, 60, 240] } // Usa cors parecida com o branding
+                headStyles: { fillColor: [42, 60, 240] }, // Usa cors parecida com o branding
+                didParseCell: function (data) {
+                    if (data.section === 'head') {
+                        // Remove o caractere de ordenação do cabeçalho no export PDF
+                        data.cell.text = data.cell.text.map(t => t.replace(/[⇅▲▼]/g, '').trim());
+                    }
+                }
             });
 
             doc.save(`nfe_${currentView}.pdf`);
