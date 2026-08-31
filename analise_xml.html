@@ -2055,7 +2055,7 @@
                                     let expectedBcIbsCbs = vProd + vFrete + vSeg + vOutro + vII + vIS - vDesc - vPIS - vCOFINS - vICMS - vFCP - vICMSUFDest - vFCPUFDest;
 
                                     if (Math.abs(vBC - expectedBcIbsCbs) <= eps) {
-                                        addTest(origin, 'IBS/CBS', 'Composição de BC IBS/CBS', vBC, expectedBcIbsCbs, 'vProd+vFrete+vSeg+vOutro+vII+vIS-vDesc-vPIS-vCOFINS-vICMS-vFCP-ICMSUFDest-FCPUFDest');
+                                        addTest(origin, 'IBS/CBS', 'Composição de BC IBS/CBS', vBC, expectedBcIbsCbs, 'vProd+vFrete+vSeg+vOutro+vII+vIS-vDesc-vPIS-vCOFINS-vICMS-vFCP-ICMSUFDest-FCPUFDest', { variables: { vProd, vFrete, vSeg, vOutro, vII, vIS, vDesc, vPIS, vCOFINS, vICMS, vFCP, vICMSUFDest, vFCPUFDest, Informado: vBC } });
                                     } else {
                                         addTest(origin, 'IBS/CBS', 'Composição de BC IBS/CBS (Indeterminada)', vBC, expectedBcIbsCbs, 'Múltiplas deduções. Não bate com padrão.', { forceWarning: true, variables: { vProd, vFrete, vSeg, vOutro, vII, vIS, vDesc, vPIS, vCOFINS, vICMS, vFCP, vICMSUFDest, vFCPUFDest, Informado: vBC } });
                                     }
