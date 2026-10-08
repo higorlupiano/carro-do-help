@@ -478,6 +478,15 @@
                             </svg>
                             Corrigir Trib. Regular
                         </button>
+                        <button class="btn btn-export" id="fixIcms102Btn"
+                            style="background-color: #00897b; color: white; border: none; display: none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M12 5v14M5 12h14" />
+                            </svg>
+                            Adicionar ICMS 102
+                        </button>
                     </div>
                 </div>
 
@@ -1040,6 +1049,19 @@
                 const fixBtn = document.getElementById('fixGTribRegularBtn');
                 if (fixBtn) {
                     fixBtn.style.display = needsFix ? 'inline-flex' : 'none';
+                }
+
+                // Verifica se precisa mostrar o botão de adicionar ICMS (det sem grupo <ICMS> dentro de <imposto>)
+                let needsIcmsFix = false;
+                bsDets.forEach(det => {
+                    const imposto = det.querySelector('imposto');
+                    if (imposto && !imposto.querySelector('ICMS')) {
+                        needsIcmsFix = true;
+                    }
+                });
+                const fixIcmsBtn = document.getElementById('fixIcms102Btn');
+                if (fixIcmsBtn) {
+                    fixIcmsBtn.style.display = needsIcmsFix ? 'inline-flex' : 'none';
                 }
 
                 // UI Update
@@ -1624,6 +1646,86 @@
             }
         });
 
+        document.getElementById('fixIcms102Btn').addEventListener('click', () => {
+            if (!window.currentRawXmlString) return;
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(window.currentRawXmlString, "application/xml");
+                const dets = xmlDoc.querySelectorAll('infNFe > det');
+                let countAdded = 0;
+
+                dets.forEach(det => {
+                    let imposto = det.querySelector('imposto');
+                    if (!imposto) {
+                        const ns = det.namespaceURI;
+                        imposto = ns ? xmlDoc.createElementNS(ns, 'imposto') : xmlDoc.createElement('imposto');
+                        det.appendChild(imposto);
+                    }
+
+                    // Se já tiver <ICMS>, não precisa adicionar
+                    if (imposto.querySelector('ICMS')) return;
+
+                    const ns = imposto.namespaceURI;
+                    const createEl = (tag) => ns ? xmlDoc.createElementNS(ns, tag) : xmlDoc.createElement(tag);
+
+                    // Criação da estrutura:
+                    // <ICMS>
+                    //     <ICMSSN102>
+                    //         <orig>0</orig>
+                    //         <CSOSN>102</CSOSN>
+                    //     </ICMSSN102>
+                    // </ICMS>
+                    const icmsNode = createEl('ICMS');
+                    const icmsSn102Node = createEl('ICMSSN102');
+
+                    const origNode = createEl('orig');
+                    origNode.textContent = '0';
+                    icmsSn102Node.appendChild(origNode);
+
+                    const csosnNode = createEl('CSOSN');
+                    csosnNode.textContent = '102';
+                    icmsSn102Node.appendChild(csosnNode);
+
+                    icmsNode.appendChild(icmsSn102Node);
+
+                    // Insere logo após o início de <imposto> (como primeiro filho)
+                    if (imposto.firstChild) {
+                        imposto.insertBefore(icmsNode, imposto.firstChild);
+                    } else {
+                        imposto.appendChild(icmsNode);
+                    }
+
+                    countAdded++;
+                });
+
+                if (countAdded === 0) {
+                    alert('Nenhum item sem a tag <ICMS> foi encontrado.');
+                    return;
+                }
+
+                // Serializar e baixar
+                const serializer = new XMLSerializer();
+                let newXmlString = serializer.serializeToString(xmlDoc);
+                if (!newXmlString.startsWith('<?xml')) {
+                    newXmlString = '<?xml version="1.0" encoding="UTF-8"?>\n' + newXmlString;
+                }
+
+                let nfeId = xmlDoc.querySelector('infNFe')?.getAttribute('Id') || 'Desconhecido';
+                nfeId = nfeId.replace('NFe', '');
+
+                const blob = new Blob([newXmlString], { type: 'text/xml;charset=utf-8' });
+                saveFileBlob(blob, `NFe_${nfeId}_ICMS102.xml`);
+
+                // Reprocessa no app para atualizar a visualização e ocultar o botão
+                processXmlContent(newXmlString, `NFe_${nfeId}_ICMS102.xml`, false);
+                alert(`Grupo <ICMS> com CSOSN 102 adicionado com sucesso em ${countAdded} produto(s)! O download do XML atualizado foi iniciado.`);
+
+            } catch (err) {
+                console.error(err);
+                alert('Erro ao adicionar o grupo ICMS no XML: ' + err.message);
+            }
+        });
+
         function saveFileBlob(blob, filename) {
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
@@ -1883,7 +1985,9 @@
                     // Impostos
                     if (imposto) {
                         const icmsNode = imposto.querySelector('ICMS');
-                        if (icmsNode && icmsNode.children[0]) {
+                        if (!icmsNode) {
+                            addTest(origin, 'ICMS', `Grupo ICMS Ausente`, 0, 0, `Nenhum grupo <ICMS> encontrado dentro de <imposto>.`, { forceWarning: true, msg: 'Produto sem grupo <ICMS>. Utilize a ação "Adicionar ICMS 102" na barra superior para regularizar.' });
+                        } else if (icmsNode.children[0]) {
                             const icmsChild = icmsNode.children[0];
                             const pICMS = parseFloat(getVal(icmsChild, 'pICMS')) || 0;
                             const vBC = parseFloat(getVal(icmsChild, 'vBC')) || 0;
