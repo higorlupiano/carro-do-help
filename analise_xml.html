@@ -485,7 +485,7 @@
                                 stroke-linejoin="round">
                                 <path d="M12 5v14M5 12h14" />
                             </svg>
-                            Adicionar ICMS 102
+                            Adicionar grupo ICMS
                         </button>
                     </div>
                 </div>
@@ -1995,7 +1995,7 @@
                     if (imposto) {
                         const icmsNode = imposto.querySelector('ICMS');
                         if (!icmsNode) {
-                            addTest(origin, 'ICMS', `Grupo ICMS Ausente`, 0, 0, `Nenhum grupo <ICMS> encontrado dentro de <imposto>.`, { forceWarning: true, msg: 'Produto sem grupo <ICMS>. Utilize a ação "Adicionar ICMS 102" na barra superior para regularizar.' });
+                            addTest(origin, 'ICMS', `Grupo ICMS Ausente`, 0, 0, `Nenhum grupo <ICMS> encontrado dentro de <imposto>.`, { forceWarning: true, msg: 'Produto sem grupo <ICMS>. Utilize a ação "Adicionar grupo ICMS" na barra superior para regularizar.' });
                         } else if (icmsNode.children[0]) {
                             const icmsChild = icmsNode.children[0];
                             const pICMS = parseFloat(getVal(icmsChild, 'pICMS')) || 0;
