@@ -1688,11 +1688,20 @@
 
                     icmsNode.appendChild(icmsSn102Node);
 
-                    // Insere logo após o início de <imposto> (como primeiro filho)
-                    if (imposto.firstChild) {
-                        imposto.insertBefore(icmsNode, imposto.firstChild);
+                    // Insere após </vTotTrib> se existir, senão insere no início de <imposto>
+                    const vTotTribNode = imposto.querySelector('vTotTrib');
+                    if (vTotTribNode) {
+                        if (vTotTribNode.nextSibling) {
+                            imposto.insertBefore(icmsNode, vTotTribNode.nextSibling);
+                        } else {
+                            imposto.appendChild(icmsNode);
+                        }
                     } else {
-                        imposto.appendChild(icmsNode);
+                        if (imposto.firstChild) {
+                            imposto.insertBefore(icmsNode, imposto.firstChild);
+                        } else {
+                            imposto.appendChild(icmsNode);
+                        }
                     }
 
                     countAdded++;
